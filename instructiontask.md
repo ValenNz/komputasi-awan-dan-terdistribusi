@@ -1,389 +1,139 @@
-# Komputasi Awan dan Terdistribusi — Panduan Kelompok
+# 📚 Repositori Tugas: Sistem Terdistribusi & Komputasi Awan
 
-Repository ini digunakan untuk mengerjakan tugas mata kuliah **Komputasi Awan dan Terdistribusi**.
-
-Repository utama:
-https://github.com/aldonesia/komputasi-awan-dan-terdistribusi
-
-Repository kelompok:
-https://github.com/ValenNz/komputasi-awan-dan-terdistribusi
-
----
+Repositori ini digunakan oleh kelompok kami untuk mengerjakan seluruh tugas (Tugas 1–15) sepanjang semester. **Baca panduan ini dengan saksama sebelum mulai mengerjakan tugas** agar alur kerja kita rapi, kontribusi tercatat, dan sesuai dengan rubrik penilaian dosen.
 
 ## 👥 Anggota Kelompok
 
-| No | Nama | NIM | Tugas/Peran |
-|---|---|---|---|
-| 1 | Farrelino Ulung Satya Amando | 103072400005 | Koordinator / Analisis |
-| 2 | Haniel Juanta Sembiring | 103072400145 | Implementasi |
-| 3 | Nuevalen Refitra Alswando | 103072430008 | Testing & Dokumentasi |
+| Nama | NIM | Peran / Fokus (Opsional, bisa disesuaikan per tugas) |
+| :--- | :--- | :--- |
+| **Nuevalen Refitra Alswanfo** | 103072430008 | - |
+| **FARRELLINO ULUNG SATYA AMANDO** | 103072400005 | - |
+| **Haniel Juanta Sembiring** | 103072400145 | - |
 
-> Pembagian tugas dapat berubah sesuai kebutuhan masing-masing tugas.
-
----
-
-# 📚 Struktur Repository
-
-Setiap tugas sudah disediakan di dalam folder masing-masing.
-
-Contoh:
-
-```text
-komputasi-awan-dan-terdistribusi/
-│
-├── tugas-01-identifikasi-masalah-pitfall/
-├── tugas-02-...
-├── tugas-03-...
-├── tugas-04-...
-├── ...
-└── tugas-15-...
-```
-
-**Jangan membuat folder tugas baru di root repository.**
-
-Jika dosen memberikan Tugas 1, maka fokus pada:
-
-```text
-tugas-01-identifikasi-masalah-pitfall/
-```
-
-Jika dosen memberikan Tugas 2, maka fokus pada folder:
-
-```text
-tugas-02-...
-```
+> ⚠️ **PENTING:** Sesuai aturan handbook, **setiap anggota WAJIB melakukan `commit` dan `push` dari laptop masing-masing**. Dilarang keras satu orang mengerjakan semua lalu di-commit atas nama sendiri. History commit adalah bukti kontribusi nyata.
 
 ---
 
-# 🚀 Cara Memulai
+## 🚀 1. Setup Awal (Lakukan SEKALI di awal semester)
 
-## 1. Clone Repository
+Pastikan semua anggota sudah menginstal dan mengonfigurasi ini di laptop masing-masing:
 
-Clone repository kelompok ke laptop masing-masing:
-
-```bash
-git clone https://github.com/ValenNz/komputasi-awan-dan-terdistribusi.git
-```
-
-Masuk ke folder:
-
-```bash
-cd komputasi-awan-dan-terdistribusi
-```
-
-Cek status Git:
-
-```bash
-git status
-```
+1. **Git & GitHub**: 
+   ```bash
+   git config --global user.name "Nama Lengkap Sesuai Absen"
+   git config --global user.email "email@mahasiswa.telkomuniversity.ac.id"
+   ```
+2. **Docker Desktop**: Pastikan berjalan dan verifikasi dengan `docker --version` serta `docker compose version`.
+3. **Python 3 & Virtual Environment**: Selalu aktifkan venv per tugas agar dependensi tidak bentrok.
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate  # Mac/Linux
+   venv\Scripts\activate     # Windows
+   ```
 
 ---
 
-# 📖 2. Baca README Tugas
+## 🔄 2. Alur Kerja Harian (Cara Pull & Push)
 
-Sebelum mengerjakan tugas, **WAJIB membaca README.md yang terdapat di folder tugas tersebut.**
+Ikuti langkah ini **setiap kali** kalian mulai dan selesai mengerjakan bagian tugas.
 
-Contoh:
-
-```text
-tugas-01-identifikasi-masalah-pitfall/
-└── README.md
-```
-
-README tugas berisi:
-* Tujuan tugas
-* Permasalahan yang harus diselesaikan
-* Instruksi pengerjaan
-* File yang harus dibuat/diedit
-* Ketentuan tugas
-* Rubrik penilaian
-
-Jangan langsung mengerjakan sebelum memahami instruksinya.
-
----
-
-# 📝 3. Alur Pengerjaan
-
-Setiap tugas dikerjakan dengan alur:
-
-```text
-Baca README
-     ↓
-Pahami tugas
-     ↓
-Diskusi kelompok
-     ↓
-Bagi pekerjaan
-     ↓
-Kerjakan bagian masing-masing
-     ↓
-Review hasil
-     ↓
-Commit
-     ↓
-Push
-     ↓
-Testing / pengecekan akhir
-     ↓
-Finalisasi
-     ↓
-Buat Git Tag
-```
-
----
-
-# 👨‍💻 4. Pembagian Pekerjaan
-
-Contoh pembagian untuk **3 anggota**:
-
-### Anggota 1 — Koordinator / Analisis
-**Tugas:**
-* Memahami instruksi tugas secara menyeluruh
-* Membantu menentukan pendekatan solusi
-* Membagi pekerjaan secara adil
-* Menggabungkan hasil pekerjaan anggota lain
-* Melakukan final review sebelum pengumpulan
-
-### Anggota 2 — Implementasi
-**Tugas:**
-* Mengerjakan bagian inti/coding implementasi
-* Membuat atau mengubah file sesuai instruksi tugas
-* Melakukan testing dasar pada bagian yang dikerjakan
-
-### Anggota 3 — Testing & Dokumentasi
-**Tugas:**
-* Menguji hasil implementasi secara menyeluruh
-* Mencari error dan mencatat hasil pengujian
-* Membuat dokumentasi, menyusun laporan/jurnal
-* Menambahkan screenshot/bukti jika diperlukan
-
-> Pembagian di atas hanya contoh. Untuk setiap tugas, pembagian dapat disesuaikan dengan kebutuhan dan kesepakatan kelompok.
-
----
-
-# 🌿 5. Aturan Git
-
-## Sebelum mulai mengerjakan
-Selalu ambil perubahan terbaru:
+### Langkah 1: Sebelum Mulai Mengerjakan (WAJIB)
+Selalu tarik perubahan terbaru dari GitHub agar tidak terjadi konflik:
 ```bash
 git pull origin main
 ```
-Kemudian cek:
-```bash
-git status
-```
 
-## Setelah selesai mengerjakan
-Lihat perubahan:
+### Langkah 2: Saat Mengerjakan
+- Kerjakan bagian yang sudah dibagi.
+- Simpan progres secara bertahap (jangan menunggu 100% selesai baru commit).
+- **Update `JURNAL.md` secara real-time** (catat kendala, solusi, dan log penggunaan AI jika ada). Jangan merapikan jurnal di akhir, biarkan apa adanya sebagai bukti kerja asli.
+
+### Langkah 3: Setelah Selesai Sebagian (Commit & Push)
+Lakukan ini dari laptop masing-masing anggota:
 ```bash
+# 1. Cek file yang berubah
 git status
-```
-Tambahkan perubahan:
-```bash
-git add .
-```
-Commit:
-```bash
-git commit -m "feat(tugas-01): mengerjakan bagian analisis"
-```
-Push:
-```bash
+
+# 2. Tambahkan file yang dikerjakan (spesifik, jangan git add . jika tidak perlu)
+git add tugas-XX-nama-tugas/
+
+# 3. Commit dengan pesan yang JELAS dan mencantumkan nama/nim (opsional tapi disarankan)
+git commit -m "Tugas XX: [Deskripsi singkat pekerjaan, misal: implementasi worker thread] - oleh [Nama]"
+
+# 4. Push ke GitHub
 git push origin main
 ```
 
+> 💡 **Tips Branching (Opsional tapi Rapi):**  
+> Jika ingin lebih aman, buat branch atas nama sendiri:  
+> `git checkout -b fitur-nuevalen` → kerjakan → `git push origin fitur-nuevalen` → gabungkan ke `main` via Pull Request di GitHub repo kita sendiri.
+
 ---
 
-# 💬 6. Format Commit
+## 📦 3. Struktur Folder Tugas (Wajib Diikuti)
 
-Gunakan commit message yang jelas dan menjelaskan apa yang dikerjakan.
-
-Contoh:
-```bash
-git commit -m "feat(tugas-01): menambahkan analisis masalah"
-git commit -m "feat(tugas-01): menambahkan implementasi"
-git commit -m "test(tugas-01): melakukan pengujian"
-git commit -m "docs(tugas-01): memperbaiki dokumentasi"
-```
-
-Hindari commit seperti:
+Setiap folder tugas (`tugas-XX-.../`) harus mengikuti format ini:
 ```text
-update
-fix
-coba
-test
-aaa
-final
-fix lagi
-```
-Karena commit history dapat digunakan untuk melihat kontribusi masing-masing anggota.
-
----
-
-# ⚠️ 7. Penting: Jangan Saling Menimpa Pekerjaan
-
-Sebelum mengubah file yang sedang dikerjakan anggota lain, **komunikasikan terlebih dahulu di grup.**
-
-Contoh:
-> "Aku mau edit README tugas-01 ya."
-
-atau:
-> "Aku sudah selesai bagian implementasi, selanjutnya Valen yang mau testing dan dokumentasi?"
-
-Tujuannya agar tidak terjadi konflik Git atau pekerjaan yang tertimpa.
-
----
-
-# 🤖 8. Aturan Penggunaan AI
-
-Penggunaan AI harus mengikuti ketentuan yang diberikan pada repository/tugas oleh dosen.
-
-AI dapat digunakan untuk:
-* Brainstorming
-* Memahami konsep
-* Membantu membuat outline
-* Menjelaskan error secara umum
-* Membantu memahami dokumentasi
-
-Namun, **jangan langsung menyalin hasil AI sebagai hasil akhir tugas jika tidak diperbolehkan oleh instruksi tugas.**
-
-Setiap penggunaan AI yang diwajibkan untuk dicatat harus dituliskan pada:
-```text
-JURNAL.md
-```
-
-Contoh:
-```markdown
-## Penggunaan AI
-
-AI digunakan untuk membantu memahami konsep dan menyusun
-outline pengerjaan tugas.
-
-AI tidak digunakan untuk menghasilkan hasil akhir yang
-langsung disalin ke dalam tugas.
-```
-Selalu ikuti aturan AI yang terdapat pada README tugas.
-
----
-
-# 🔍 9. Sebelum Push
-
-Sebelum melakukan push, pastikan:
-* [ ] Sudah membaca README tugas
-* [ ] Pekerjaan sesuai instruksi
-* [ ] Tidak ada file yang tidak diperlukan
-* [ ] Tidak ada password/API key/token
-* [ ] Program dapat dijalankan jika terdapat program
-* [ ] Dokumentasi sudah diperbarui
-* [ ] Sudah melakukan testing
-* [ ] Commit message sudah jelas
-
----
-
-# 🏁 10. Finalisasi Tugas
-
-Jika tugas sudah selesai dan sudah direview semua anggota:
-
-```bash
-git status
-```
-Pastikan tidak ada perubahan yang belum di-commit.
-
-Kemudian buat tag:
-```bash
-git tag tugas-01-submit
-```
-Push tag:
-```bash
-git push origin tugas-01-submit
-```
-Tag digunakan untuk menandai versi final tugas yang dikumpulkan.
-
----
-
-# 📌 Aturan Utama Kelompok
-
-1. **Baca README tugas sebelum mengerjakan.**
-2. **Kerjakan hanya folder tugas yang diberikan dosen.**
-3. **Jangan mengubah folder tugas lain tanpa alasan.**
-4. **Setiap anggota harus memiliki kontribusi yang jelas.**
-5. **Commit dilakukan secara berkala, bukan hanya sekali di akhir.**
-6. **Gunakan commit message yang jelas.**
-7. **Saling komunikasi sebelum mengubah file yang sedang dikerjakan anggota lain.**
-8. **Lakukan review dan testing sebelum finalisasi.**
-9. **Ikuti aturan penggunaan AI dari dosen.**
-10. **Jangan menunggu satu orang mengerjakan semuanya.**
-
----
-
-# 🗣️ Contoh Alur Kerja Tugas 01
-
-Misalnya dosen memberikan:
-> Tugas 01 — Identifikasi Masalah & Pitfall
-
-Maka:
-
-### 1. Semua anggota
-Membaca:
-```text
-tugas-01-identifikasi-masalah-pitfall/README.md
-```
-
-### 2. Diskusi
-Tentukan:
-```text
-Apa masalahnya?
-Apa yang harus dianalisis?
-File apa yang harus dibuat?
-Siapa mengerjakan bagian apa?
-```
-
-### 3. Pembagian
-```text
-Anggota 1 (Farrelino) → Analisis masalah & Koordinasi
-Anggota 2 (Haniel)    → Implementasi/contoh
-Anggota 3 (Valen)     → Testing & Dokumentasi
-```
-
-### 4. Masing-masing mengerjakan bagian
-Setelah selesai:
-```bash
-git add .
-git commit -m "feat(tugas-01): mengerjakan bagian ..."
-git push origin main
-```
-
-### 5. Review bersama
-Cek apakah hasil sudah sesuai README.
-
-### 6. Finalisasi
-```bash
-git tag tugas-01-submit
-git push origin tugas-01-submit
+tugas-XX-nama-tugas/
+├── README.md        # Analisis studi kasus & jawaban soal
+├── JURNAL.md        # Log proses berpikir, debugging, & log penggunaan AI (Level 2)
+├── src/             # Kode sumber (jika ada)
+├── bukti/           # Screenshot terminal (terlihat prompt user) atau link video demo
+└── (file lain)      # Misal: docker-compose.yml, diagram, dll.
 ```
 
 ---
 
-# 📞 Komunikasi Kelompok
+## 🏁 4. Cara Submit Tugas (DEADLINE)
 
-Gunakan grup untuk memberitahukan:
-* Bagian yang sedang dikerjakan
-* Bagian yang sudah selesai
-* Perubahan file
-* Error yang ditemukan
-* Hasil testing
-* Status finalisasi
+**JANGAN gunakan Pull Request ke repo dosen!** Kita menggunakan **Git Tag** untuk menandai submission.
 
-Contoh:
-> **Farrelino:** Aku kerjakan bagian analisis dan koordinasi tugas-01.
+Lakukan langkah ini saat tugas sudah 100% selesai dan siap dikumpulkan (bisa dilakukan oleh salah satu anggota, tapi pastikan semua perubahan sudah di-push):
 
-> **Haniel:** Oke, aku lanjut bagian implementasi setelah analisis fix.
+1. Pastikan semua sudah di-commit dan di-push ke `main`:
+   ```bash
+   git pull origin main
+   git push origin main
+   ```
+2. Buat tag submission (ganti `XX` dengan nomor tugas, misal `03`):
+   ```bash
+   git tag tugas-XX-submit
+   git push origin tugas-XX-submit
+   ```
+3. **Ambil Link untuk Moodle**:  
+   Buka GitHub, masuk ke folder tugas tersebut, lalu **klik dropdown branch/tag di kiri atas** dan pilih `tugas-XX-submit`.  
+   Salin URL dari browser. Contoh format:  
+   `https://github.com/<username-kelompok>/<nama-repo>/tree/tugas-03-submit/tugas-03-multithreading-container`
+4. Tempel link tersebut ke kolom submission di **Moodle**.
 
-> **Valen:** Siap, aku akan menunggu hasil implementasi untuk testing dan penyusunan JURNAL.md.
-
-Dengan begitu semua anggota tahu progress masing-masing.
+> ⚠️ **Jika ada revisi sebelum deadline:**  
+> Pindahkan tag ke commit terbaru:  
+> `git tag -f tugas-XX-submit`  
+> `git push origin tugas-XX-submit --force`  
+> Link Moodle tidak perlu diganti, otomatis mengikuti tag terbaru.
 
 ---
 
-## 🎯 Target Kita
+## 🤖 5. Aturan Penggunaan AI
 
-**Bukan hanya tugas selesai, tetapi semua anggota memahami apa yang dikerjakan dan memiliki kontribusi yang terlihat di GitHub.**
+- **Diperbolehkan**: Level 2 (AI Assisted Idea Generation & Structuring). Boleh pakai AI untuk brainstorming ide awal atau menyusun outline.
+- **DILARANG**: Meminta AI menulis kode akhir, analisis README, atau diagram secara utuh lalu tinggal copy-paste.
+- **WAJIB**: Mencatat sesi penggunaan AI di bagian **"Log Penggunaan AI"** dalam `JURNAL.md` (apa yang ditanyakan, apa outputnya, dan bagaimana kita memodifikasinya).
+
+---
+
+## 🛠️ 6. Troubleshooting Singkat
+
+| Masalah | Solusi |
+| :--- | :--- |
+| `git push` ditolak (`rejected`) | Jalankan `git pull origin main` dulu, selesaikan konflik jika ada, lalu `git push` lagi. |
+| Port sudah dipakai (`address already in use`) | Ganti port di kode/`docker-compose.yml`, atau matikan proses lama (`lsof -i :PORT`). |
+| Docker error / container langsung exit | Cek log dengan `docker logs <container-id>` atau `docker compose logs`. |
+| Lupa update `JURNAL.md` | Sempatkan waktu 5 menit di akhir sesi coding untuk mencatat progres di jurnal. |
+
+---
+
+**Mari kita kerjakan dengan disiplin, jujur, dan kolaboratif!**  
+Jika ada yang bingung dengan langkah Git atau Docker, diskusikan di grup chat sebelum asal commit agar history tetap bersih.
+
+---
