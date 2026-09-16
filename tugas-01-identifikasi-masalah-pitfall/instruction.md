@@ -1,4 +1,4 @@
-# 📋 Instruksi Pembagian Tugas 1: Identifikasi Pitfall FoodGo
+# 📋 Instruksi Pembagian Tugas 1: Identifikasi Pitfall FoodGo (Asumsi)
 
 **Kelompok:** [Isi Nama Kelompok, misal: Kelompok FoodGo Dev]  
 **Target Selesai:** [Isi Tanggal, misal: H-2 sebelum deadline]
