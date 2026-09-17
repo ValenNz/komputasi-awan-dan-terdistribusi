@@ -12,4 +12,4 @@ c
 djfdhfhdhfjhdjfk
 
 ksjlskjldsjdlsjk
-AKU CINTA KARINA
+AKU CINTA KARINAFUCK NIGGER
