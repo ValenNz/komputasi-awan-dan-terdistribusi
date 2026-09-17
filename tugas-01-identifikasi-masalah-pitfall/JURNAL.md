@@ -3,9 +3,9 @@
 > Isi jurnal ini selama proses diskusi berlangsung, bukan ditulis ulang rapi di akhir. Tulis dengan gaya bebas — poin diskusi, kebuntuan, perubahan pikiran.
 
 ## [Tanggal diskusi 1]
-- Peserta: [nama-nama yang hadir]
-- Poin diskusi: ...
-- Perbedaan pendapat (jika ada): ...
+- Peserta: [nama-nama yang hadir]: AAAAAAAAAAA
+- Poin diskusi: ...AAAAAAAA
+- Perbedaan pendapat (jika ada): AAAA
 
 ## [Tanggal diskusi 2]
 - ...
