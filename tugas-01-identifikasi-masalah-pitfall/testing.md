@@ -1,17 +1,10 @@
 valen
 kjdfdkfjkd
-dhfjdhjfhdf
-dfhjdf
-jdhjdf
 
 farel
-AAAAAAAAAAA
-kjdhfjkdshfhk
+
+sadSLKdnwjoabd uawb ubaw jind aoiwndo wan diawn doiawbndw
 niel
 
 djahhuidhwauhduoawhdowadwahsiudhwai
-
-kdhfshksdkhfhjdsjf
-
-FARREL
-HAHAHAHAHAHAHHAA
+c
