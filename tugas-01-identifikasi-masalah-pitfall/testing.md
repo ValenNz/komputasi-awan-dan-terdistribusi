@@ -12,7 +12,7 @@ c
 djfdhfhdhfjhdjfk
 
 ksjlskjldsjdlsjk
-AKU CINTA KARINA
+AKU CINTA KARINA AESPA
 
 jkhfdhhfhsdf
-AKU CINTA KARINAFUCK NIGGER
+AKU CINTA KARINA AESPA NIGGER
