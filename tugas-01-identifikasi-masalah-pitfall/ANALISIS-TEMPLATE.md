@@ -8,51 +8,81 @@
 | [nama 2] | [nim] | [pitfall/bagian yang dikerjakan] |
 | [nama 3] | [nim] | [pitfall/bagian yang dikerjakan] |
 
-## Pitfall 1: [nama pitfall] — ditulis oleh [nama]
+## Pitfall 1: *“The network is reliable”*
 
-## Pitfall 1: *"The network is reliable"* — ditulis oleh Nuevalen Refitra Alswanado
+### Analisis Kami
 
-**Bukti di skENARIO:**
-Pada deskripsi FoodGo tertulis secara eksplisit:
-> *"Tim menemukan bahwa kode mereka menulis asumsi seperti `# network is always reliable, no need for retry` dan tidak ada timeout sama sekali pada pemanggilan antar service (modul pesanan memanggil modul pembayaran dan menunggu tanpa batas waktu)."*
+Berdasarkan skenario FoodGo, kami menemukan adanya asumsi bahwa **jaringan antar-service selalu dapat diandalkan**. Hal ini terlihat dari kode yang menggunakan komentar:
 
-Komentar `no need for retry` dan ketiadaan timeout adalah manifestasi langsung dari fallacy pertama Peter Deutsch: mengasumsikan jaringan antar-service (dalam hal ini antara modul pesanan dan modul pembayaran di FoodGo) selalu bisa diandalkan untuk menghantarkan request dan response.
+> *“network is always reliable, no need for retry”*
 
-**Kenapa ini keliru:**
-Dalam sistem terdistribusi nyata, jaringan **tidak pernah** 100% reliable. Ada banyak penyebab kegagalan yang berada di luar kendali aplikasi:
-- *Packet loss* karena kongesti di router/switch antar-rack atau antar-datacenter.
-- *Transient failure*: server pembayaran sedang GC pause, restart, atau overload sesaat.
-- *TCP connection reset* oleh load balancer atau firewall karena idle terlalu lama.
-- *DNS resolution failure* sesaat saat service discovery refresh.
-- *Partial failure*: hanya satu replica dari service pembayaran yang bermasalah, bukan semuanya.
+Selain itu, pada pemanggilan antara **modul pesanan dan modul pembayaran** tidak terdapat timeout, sehingga modul pesanan dapat menunggu respons dari modul pembayaran tanpa batas waktu.
 
-Mengasumsikan jaringan selalu reliable berarti mengabaikan kenyataan bahwa kegagalan itu **normal dan pasti terjadi**, terutama saat trafik FoodGo melonjak (jam makan siang / promo besar) — persis skenario yang dilaporkan.
+Menurut analisis kami, kondisi tersebut merupakan bentuk **fallacy “The network is reliable”** karena sistem menganggap komunikasi antar-service akan selalu berhasil, padahal dalam sistem terdistribusi kegagalan komunikasi dapat terjadi sewaktu-waktu.
 
-**Dampak ke FoodGo:**
-Karena tidak ada timeout dan tidak ada retry, yang terjadi di FoodGo adalah mekanisme kegagalan berantai (*cascading failure*) seperti ini:
-1. Modul pesanan memanggil modul pembayaran secara *synchronous* untuk memvalidasi transaksi.
-2. Ketika modul pembayaran lambat (misal karena DB-nya overload saat promo), request dari modul pesanan **menggantung tanpa batas** — tidak ada batas waktu tunggu.
-3. Setiap request yang menggantung ini mengikat satu *thread* di thread pool modul pesanan. Karena thread pool terbatas (misal 200 thread di Tomcat/Undertow), dalam hitungan detik semua thread terpakai.
-4. Akibatnya, modul pesanan **tidak bisa melayani request baru sama sekali** — bahkan untuk operasi yang sebenarnya tidak butuh pembayaran (misal lihat menu). User melihat aplikasi "sangat lambat, beberapa permintaan timeout" (sesuai gejala yang dilaporkan).
-5. Karena tidak ada retry, satu kegagalan jaringan sesaat (misal 1 detik packet loss) langsung jadi kegagalan permanen bagi user — pesanan gagal bayar, user harus ulang dari awal, beban malah bertambah.
-6. Di sisi lain, karena tidak ada mekanisme deteksi dini, modul pesanan terus mencoba memanggil modul pembayaran yang sedang sakit, memperparah beban modul pembayaran → *death spiral*.
+### Mengapa Menjadi Masalah?
 
-Jadi ironinya: asumsi "jaringan reliable" justru bikin sistem FoodGo **lebih tidak reliable** saat dibutuhkan.
+Kami melihat bahwa masalah utamanya bukan hanya ketika jaringan gagal, tetapi **bagaimana FoodGo menangani kegagalan tersebut**.
 
-**Solusi desain awal:**
-Saya mengusulkan kombinasi tiga mekanisme yang saling melengkapi untuk modul pesanan ↔ modul pembayaran di FoodGo:
+Misalnya, ketika modul pembayaran mengalami overload pada saat promo atau jam makan siang, respons pembayaran dapat menjadi sangat lambat. Karena tidak terdapat timeout, modul pesanan akan terus menunggu respons tersebut.
 
-1. **Timeout agresif di setiap pemanggilan antar-service.** Misalnya timeout 3 detik untuk panggilan pembayaran. Jika tidak ada respons dalam 3 detik, anggap gagal dan lepaskan thread — jangan biarkan menggantung.
-2. **Retry dengan *exponential backoff* + *jitter*.** Jika panggilan gagal karena *transient error* (timeout, 5xx, connection reset), coba ulang maksimal 3 kali dengan delay yang semakin panjang (100ms → 200ms → 400ms) ditambah *random jitter* agar retry dari banyak client tidak serentak (*thundering herd*).
-3. **Circuit Breaker** di modul pesanan. Jika dalam 10 detik terakhir lebih dari 50% panggilan ke pembayaran gagal, circuit breaker "trip" ke posisi OPEN — semua panggilan berikutnya langsung gagal cepat (*fast fail*) tanpa benar-barar memanggil pembayaran, selama misal 30 detik. Ini memberi waktu modul pembayaran untuk recover tanpa dihujani request lagi.
+Kondisi tersebut dapat menyebabkan:
 
-Ketiga mekanisme ini bisa diimplementasikan dengan library seperti Resilience4j (Java) atau Polly (.NET) tanpa harus menulis dari nol — realistis untuk tim kecil FoodGo.
+**Modul Pembayaran lambat → Modul Pesanan ikut menunggu → banyak request menumpuk → resource/thread habis → request baru ikut lambat atau gagal**
 
-**Trade-off:**
-- **Timeout yang terlalu pendek** bisa menyebabkan kegagalan palsu (*false positive*): pembayaran sebenarnya sedang diproses tapi belum selesai, kita sudah anggap gagal → risiko *double charge* jika user retry. Perlu desain *idempotency key* di modul pembayaran untuk mengatasinya, yang menambah kompleksitas.
-- **Retry** memperparah beban saat service target sedang overload — kalau tidak pakai backoff + jitter, kita justru ikut menumbang *thundering herd* yang membuat modul pembayaran makin lama recover.
-- **Circuit Breaker** berarti ada periode di mana user FoodGo **pasti** gagal bayar (selama circuit OPEN), meskipun modul pembayaran sebenarnya sudah mulai pulih. User experience jadi "tiba-tiba tidak bisa checkout" selama beberapa puluh detik. Perlu mekanisme *half-open* dan fallback UI yang jelas ("Pembayaran sedang gangguan, coba beberapa saat lagi").
-- Secara keseluruhan, menambah timeout + retry + circuit breaker = menambah **konfigurasi yang 
+Dengan demikian, menurut analisis kami, **satu masalah pada modul pembayaran dapat berdampak ke modul lain**. Hal ini sesuai dengan gejala pada skenario, yaitu aplikasi menjadi sangat lambat dan beberapa permintaan mengalami timeout.
+
+Kami juga melihat bahwa ketiadaan retry membuat kegagalan sementara berpotensi langsung dianggap sebagai kegagalan transaksi. Padahal, gangguan jaringan atau service bisa saja hanya terjadi sesaat.
+
+### Dampak pada FoodGo
+
+Dari skenario tersebut, kami menganalisis beberapa dampak:
+
+1. **Request dapat menggantung terlalu lama**
+   Modul pesanan tidak memiliki batas waktu ketika menunggu respons pembayaran.
+
+2. **Resource modul pesanan dapat terkuras**
+   Semakin banyak request yang menunggu, semakin banyak resource yang digunakan sehingga request lainnya ikut terdampak.
+
+3. **Terjadi efek berantai (*cascading failure*)**
+   Gangguan pada modul pembayaran dapat menyebabkan modul pesanan ikut mengalami penurunan performa.
+
+4. **Pengguna mengalami kegagalan atau keterlambatan transaksi**
+   Pengguna dapat melihat proses checkout sangat lambat atau gagal meskipun gangguan awal hanya terjadi pada komunikasi antar-service.
+
+5. **Beban service pembayaran dapat semakin meningkat**
+   Jika sistem terus mengirim request ketika service pembayaran sedang bermasalah, proses pemulihan dapat menjadi semakin sulit.
+
+### Solusi yang Kami Usulkan
+
+Berdasarkan analisis tersebut, kami mengusulkan beberapa mekanisme:
+
+**1. Timeout**
+
+Setiap komunikasi antara modul pesanan dan pembayaran perlu memiliki batas waktu. Misalnya, setelah beberapa detik tidak mendapatkan respons, request dihentikan sehingga resource tidak terus terpakai.
+
+**2. Retry dengan Exponential Backoff dan Jitter**
+
+Untuk kegagalan yang bersifat sementara (*transient failure*), sistem dapat mencoba kembali request secara terbatas. Jarak antar percobaan dibuat semakin panjang dan diberi *jitter* agar banyak request tidak melakukan retry secara bersamaan.
+
+**3. Circuit Breaker**
+
+Jika modul pembayaran terus mengalami kegagalan, modul pesanan dapat menghentikan sementara pemanggilan ke modul tersebut. Dengan begitu, service pembayaran memiliki kesempatan untuk pulih dan sistem tidak terus memberikan beban tambahan.
+
+**4. Idempotency**
+
+Karena retry pada proses pembayaran memiliki risiko request yang sama diproses lebih dari sekali, kami juga menilai perlu adanya **idempotency key**. Mekanisme ini membantu memastikan satu transaksi tidak diproses atau ditagihkan berulang kali ketika terjadi retry.
+
+### Trade-off yang Kami Pertimbangkan
+
+Kami juga menemukan bahwa solusi tersebut tidak bisa diterapkan tanpa mempertimbangkan konsekuensinya.
+
+* **Timeout terlalu pendek** dapat membuat transaksi yang sebenarnya masih diproses dianggap gagal.
+* **Retry** dapat menambah beban service jika dilakukan terlalu sering atau tanpa *backoff*.
+* **Circuit breaker** dapat membuat sementara waktu pengguna tidak dapat melakukan pembayaran ketika circuit dalam kondisi *open*.
+* **Idempotency** menambah kompleksitas pada desain dan implementasi modul pembayaran.
+
+Karena itu, menurut analisis kami, solusi yang tepat bukan sekadar **menambahkan retry**, tetapi membuat komunikasi antar-service memiliki mekanisme **timeout, retry yang terkontrol, circuit breaker, dan idempotency** sesuai karakteristik proses pembayaran.
 
 ---
 
