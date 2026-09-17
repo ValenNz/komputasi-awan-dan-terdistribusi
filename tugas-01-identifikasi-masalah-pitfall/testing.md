@@ -10,6 +10,3 @@ djahhuidhwauhduoawhdowadwahsiudhwai
 c
 
 djfdhfhdhfjhdjfk
-
-
-kjjdfkjsdfjldfjl
