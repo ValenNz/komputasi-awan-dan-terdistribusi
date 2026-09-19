@@ -5,7 +5,7 @@
 | Nama | NIM | Kontribusi |
 |---|---|---|
 | Nuevalen Refitra Alswanado | 103072430008 | Pitfall 1: "The network is reliable" |
-| [nama 2] | [nim] | [pitfall/bagian yang dikerjakan] |
+| Farrellino Ulung Satya Amando | 103072400005 | Pitfall 2: "Latency is zero" |
 | [nama 3] | [nim] | [pitfall/bagian yang dikerjakan] |
 
 ## Pitfall 1: *“The network is reliable”*
@@ -86,19 +86,77 @@ Karena itu, menurut analisis kami, solusi yang tepat bukan sekadar **menambahkan
 
 ---
 
-## Pitfall 2: [nama pitfall] — ditulis oleh [nama]
+## Pitfall 2: "Latency is Zero"
 
+### Analisis Kami
+Berdasarkan skenario FoodGo, kami menemukan adanya asumsi bahwa pemanggilan antar-service berjalan secara instan. Hal ini terlihat jelas dari :
 
+"...tidak ada timeout sama sekali pada pemanggilan antar service (modul pesanan memanggil modul pembayaran dan menunggu tanpa batas waktu)."
 
-**Bukti di skenario:** [kutip/paraphrase bagian skenario]
+Padahal, terdapat beberapa permintaan timeout di saat waktu pesanan melonjak. Menurut analisis kami, ini termasuk ke bentuk fallacy “Latency is zero” karena menganggap pengiriman data ke layanan lain dan responsenya tidak membutuhkan waktu sehingga modul dibiarkan menunggu tanpa batas waktu.
 
-**Kenapa ini keliru:** [penjelasan]
+### Mengapa Menjadi Masalah?
+Kami melihat bahwa masalah utamanya terletak pada konsep komunikasi selalu membutuhkan waktu (latensi), apalagi jika melibatkan pihak ketiga seperti payment gateway, diabaikan begitu saja. 
 
-**Dampak ke FoodGo:** [mekanisme kegagalan konkret]
+Misalnya, ketika modul pembayaran melambat akibat lonjakan trafik saat promo, latensi responsnya meningkat drastis. Karena modul pesanan tidak memiliki timeout, setiap proses yang bertugas melayani pelanggan akan tertahan saat memanggil layanan pembayaran.
 
-**Solusi desain awal:** [usulan solusi]
+Kondisi tersebut dapat menyebabkan:
 
-**Trade-off:** [apa yang dikorbankan/risiko dari solusi ini]
+Modul pembayaran lambat yang tentunya diikuti dengan respons memakan waktu lama (latensi tinggi). Ini akan menyebabkan thread modul pesanan tertahan sehingga request baru terus berdatangan dan menumpuk. Thread pool akan habis dan server crash. 
+
+### Dampak pada FoodGo
+Dari skenario tersebut, kami menganalisis beberapa dampak spesifik:
+
+1. **Thread server terkuras habis (Thread Exhaustion)**
+Modul pesanan yang memanggil modul pembayaran dibiarkan menunggu tanpa batas waktu, sehingga resource memori/proses pada server tertahan dan terkuras habis saat trafik naik.
+
+2. **Aplikasi menjadi sangat lambat**
+Karena antrean request menumpuk di server yang resource-nya hampir habis, pengguna merasakan loading aplikasi yang sangat lama.
+
+3. **Beberapa permintaan mengalami timeout di sisi pengguna**
+Meskipun kode internal tidak memiliki timeout, koneksi dari aplikasi (device pengguna) ke server FoodGo pada akhirnya akan terputus karena terlalu lama menunggu respons dari server yang macet.
+
+4. **Server backend crash total**
+Habisnya resource akibat tumpukan request yang menggantung menyebabkan server tidak bisa lagi beroperasi sehingga mati dan operasional down hingga dilakukan restart manual.
+
+### Solusi yang Kami Usulkan
+Karena permasalahan yang telah dijelaskan sebelumnya, kami mengusulkan sistem diperbaiki dengan:
+
+1. Timeout yang Ketat
+
+Setiap komunikasi antar-modul (terutama ke modul pembayaran) wajib memiliki batas waktu yang spesifik, misalnya 5 hingga 7 detik. Jika tidak ada respons, koneksi diputus secara paksa agar thread server terbebas dan bisa melayani request lain.
+
+2. Komunikasi Asinkron
+
+Sebagai alternatif jangka panjang, daripada menunggu respons pembayaran secara sinkron, modul pesanan dapat menaruh pesan ke Message Broker (seperti RabbitMQ/Kafka). Sistem tidak perlu saling menunggu, dan proses pembayaran dikerjakan di latar belakang. Modul pesanan langsung bebas melayani pelanggan lain, sementara modul pembayaran mengambil pesan dari antrean tersebut dan memprosesnya di latar belakang sesuai kapasitasnya.
+
+3. Webhooks untuk Komunikasi Asinkron Pihak Bank ke Server
+
+Karena pemrosesan di pihak bank/e-wallet memerlukan waktu (latensi > 0), modul pembayaran tidak perlu menggantung koneksi ke bank. Setelah transaksi dikirim, koneksi diputus. Ketika bank selesai memproses pembayaran di sistem mereka, payment gateway akan mengirimkan notifikasi otomatis secara asinkron via Webhook kembali ke server FoodGo.
+
+### Trade-off yang Kami Pertimbangkan
+trade-off teknis dan operasional yang harus ditangani oleh sistem dari masing-masing solusi:
+
+1. Konsekuensi dari Timeout yang Ketat
+
+Inkonsistensi Status Data: 
+Jika koneksi diputus paksa pada detik ke-7, modul pesanan berada dalam ketidakpastian. Sistem tidak tahu apakah pemotongan saldo di bank sebenarnya sudah berhasil namun responsnya terlambat, atau memang transaksinya gagal.
+
+Kewajiban Membangun Sistem Rekonsiliasi: 
+Untuk mengatasi inkonsistensi di atas, tim harus membangun program tambahan (background job) yang bertugas mengecek ulang ke pihak bank secara berkala untuk mencocokkan status akhir transaksi yang terkena timeout, guna mencegah pelanggan dirugikan (misalnya: saldo terpotong tetapi pesanan telanjur digagalkan oleh sistem).
+
+2. Konsekuensi dari Komunikasi Asinkron (Message Broker)
+
+Perubahan Pengalaman Pengguna: 
+Karena pemrosesan diletakkan di latar belakang, pelanggan tidak bisa lagi mendapatkan layar "Sukses" secara instan. Tim frontend harus mengubah antarmuka aplikasi untuk menangani status transisi ("Pesanan Anda Sedang Diproses"), yang bisa menurunkan kenyamanan pengguna yang terbiasa dengan respons seketika.
+
+Risiko Pemrosesan Ganda: 
+Sistem Message Broker umumnya menjamin pengiriman pesan minimal satu kali (at-least-once delivery), sehingga ada risiko pesan yang sama tersalurkan dua kali akibat fluktuasi jaringan. Modul pembayaran wajib mengimplementasikan Idempotency (kunci unik per transaksi) agar pelanggan tidak tertagih dua kali untuk pesanan yang sama.
+
+3. Konsekuensi dari Penggunaan Webhooks Bank
+Risiko Notifikasi Hilang:
+Jika bank mengirimkan Webhook tepat ketika server FoodGo sedang mengalami downtime atau restart singkat, notifikasi tersebut akan gagal diterima. Akibatnya, status transaksi pelanggan akan menggantung selamanya. Sistem tetap memerlukan mekanisme fallback (seperti melakukan polling otomatis setiap 10 menit) khusus untuk mengambil data transaksi yang Webhook-nya gagal masuk.
+
 
 ---
 
