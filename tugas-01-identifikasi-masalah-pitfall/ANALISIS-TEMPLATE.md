@@ -6,7 +6,7 @@
 |---|---|---|
 | Nuevalen Refitra Alswanado | 103072430008 | Pitfall 1: "The network is reliable" |
 | Farrellino Ulung Satya Amando | 103072400005 | Pitfall 2: "Latency is zero" |
-| [nama 3] | [nim] | [pitfall/bagian yang dikerjakan] |
+| Haniel Juanta Sembiring | 103072400145 | Pitfall 3: "Single Point of Failure" |
 
 ## Pitfall 1: *“The network is reliable”*
 
@@ -160,19 +160,53 @@ Jika bank mengirimkan Webhook tepat ketika server FoodGo sedang mengalami downti
 
 ---
 
-## Pitfall 3: [nama pitfall] — ditulis oleh [nama]
+## Pitfall 3: "Single Point of Failure" 
 
 
 
-**Bukti di skenario:** [kutip/paraphrase bagian skenario]
+**Bukti di skenario:** 
 
-**Kenapa ini keliru:** [penjelasan]
+foodgo adalah aplikasi yang biasanya digunakan oleh banyak orang, dan ketika ada diskon besar-besaran atau dihari tertentu biasanya terdapat lonjakan pengguna yang sangat besar. Hal ini membuat server mengalami down, dikondisi normal atau ketika ada server cadangan hal ini bukan masalah yang terlalu besar. dikondisi ini, ini menjadi msalah karena tidak ada server cadangan dan tidak hanya itu fallacy yang dilakukan yaitu "no need to retry" yang menyebabkan tidak ada time out sehingga pekerjaan yang gagal tetap dilakukan
 
-**Dampak ke FoodGo:** [mekanisme kegagalan konkret]
+*"Saat trafik naik, satu server yang menangani semua modul (pesanan, pembayaran, notifikasi kurir) kewalahan karena semuanya berjalan di satu proses monolitik yang sama."*
 
-**Solusi desain awal:** [usulan solusi]
+dari bukti di atas kita menyimpulkan sistem nya  merupakan monolitik yang dapat disimpulkan masalah sebagaian dapat menjadi rantai, menyebakan masalah total keseluruhan system.
 
-**Trade-off:** [apa yang dikorbankan/risiko dari solusi ini]
+**Kenapa ini keliru:**
+
+Foodgo adalah app yang mementingkan komputasi, internet, dan kecepatan dapat dilihat dari funsi aplikasinya, namun dengan menjadikan semua proses berjalan disatu titik adalah sebuah kesalahan yang besar. kenapa?, karena dengan melakukan semua program di atas papan yang sama kebocaran satu hal, akan memengaruhi yang lain sehingga perlu dipisahkan dan task tertentu dapat dilempar ketitik yang lain. 
+
+Menurut analisis kami, menempatkan seluruh komputasi ke dalam satu server adalah sebuah kesalahan karena rentan terkena masalah, karena menciptakan single point of failure(SPOF). Desain yang baik seharusnya sudah mengantisipasi adanya kegagalan pada satu server sehingga dapat diback up oleh yang lain, karena setiap proses berebut resource yang sangat terbatas dari server.
+
+**Dampak ke FoodGo:** 
+
+ada beberapa mekanisme kegagalan yang terjadi
+1. **kehilangan resource:** karena semua modul mulai dari pembayaran, pesanan, dan kurir berada didalam satu sumber, beban yang bertumpu disatu tempat akan menghabiskan seluruh memori yang ada.
+
+2. **kegagalan sebagian menjadi total:** dikarenekan foodgo tidak memiliki fault tolerance sehingga kesalahan disatu titik akan menyebabkan kegagalan pada proses yang lain, yang menyebabkan foodgo menjadi kacau, yang memaksa admin untuk merestart secara manual. Hal ini semua terjadi karena hanya memiliki satu server
+
+3. **Pemulihan yang Buruk:** sesuai dengan Design Goals yaitu maintainbility(Mean Time to Repair(MTTR)) ini adalah hal yang ingin dicapai, namun dari skenario ini kita dapat lihat bahwa goals satu ini tidak tercapai, karena server bergantung dengan restart manual ketika terjadi crash, hal ini  membuat MTTR menjadi sangat tinggi, jadi layanan app akan berhenti lebih lama dari sewajarnya. hal ini dapat menyebabkan banyak pengguna pindah app
+
+**Solusi desain awal:** 
+
+Kami mendapatkan beberapa ide perbaikan bertahap sesuai prinsip sistem terdistribusi:
+
+1. **Transisi menjadi Microservice Architecture:** poin masalah nya adalah karena program hanya berjalan disatu proses monolitik hal ini membuat proses menjadi sangat terbebani, dengan memecah layanan menjadi beberapa bagian hal ini dapat membuat proses menjadi lebih ringan seperti pembayaran, pesanan, dan notifikasi kurir dipecah. hal ini menciptakan Separation of Concerns.
+
+2. **Fault Tolerance Techniques(Redundancy):** dengan menerpakan konsep ini jadi membuat beberapa server dengan fungsi yang sama, yang diatur oleh load balancer. jika satu server mati maka akan dibackup oleh server yang lainya, jadi merestart manual bukan masalah yang besar lagi.
+
+3. **Pemulihan Otomatis:** sebelum nya ketika server crash, manusia lah yang melaukan restart secara manual. Dengan konsep ini ketika health check mendeteksi adanya crash failure, sistem secara otomatis melakukan restart atau melakukan proses app yang baru secara otomatis jika terjadi crash.
+
+**Trade-off:** 
+
+dalam sebuah desain, ada kelebihan pasti ada kekurangan atau side effect, dengaan menerapkan microservice dan redudancy tidak lah datang dengan gratis.
+
+1. **Kompleksitas Operasional yang Tinggi:** mengelola server dan servis yang saling berinteraksi jauh lebih susah daripada mengeololanya didalam satu server monolitik. 
+
+2. **Melacak Bug:** karena Server dan servis yang terpisah jadi melacak bug akan lebih sulit, dikarena posisi nya tidak dapat langusng dipastikan, diserver yang satu atau yang lain.
+
+3. **inkonsistensi data:** semakin banyak replika dari  server, semakin sulit menjaga konsistensi data antara server satu dengan yang lain, walaupun dapat meningkatkan performa. hal ini juga dapat menyebabkan masalah baru yaitu latency yang tinggi jika tidak diurus dengan hati-hati ketika melakukan global sinkronisasi.
+
 
 ---
 
