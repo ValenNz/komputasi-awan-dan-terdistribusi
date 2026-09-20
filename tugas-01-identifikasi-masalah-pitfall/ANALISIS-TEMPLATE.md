@@ -164,7 +164,7 @@ Jika bank mengirimkan Webhook tepat ketika server FoodGo sedang mengalami downti
 
 
 
-**Bukti di skenario:** 
+### Bukti di skenario: 
 
 foodgo adalah aplikasi yang biasanya digunakan oleh banyak orang, dan ketika ada diskon besar-besaran atau dihari tertentu biasanya terdapat lonjakan pengguna yang sangat besar. Hal ini membuat server mengalami down, dikondisi normal atau ketika ada server cadangan hal ini bukan masalah yang terlalu besar. dikondisi ini, ini menjadi msalah karena tidak ada server cadangan dan tidak hanya itu fallacy yang dilakukan yaitu "no need to retry" yang menyebabkan tidak ada time out sehingga pekerjaan yang gagal tetap dilakukan
 
@@ -172,13 +172,13 @@ foodgo adalah aplikasi yang biasanya digunakan oleh banyak orang, dan ketika ada
 
 dari bukti di atas kita menyimpulkan sistem nya  merupakan monolitik yang dapat disimpulkan masalah sebagaian dapat menjadi rantai, menyebakan masalah total keseluruhan system.
 
-**Kenapa ini keliru:**
+### Kenapa ini keliru:
 
 Foodgo adalah app yang mementingkan komputasi, internet, dan kecepatan dapat dilihat dari funsi aplikasinya, namun dengan menjadikan semua proses berjalan disatu titik adalah sebuah kesalahan yang besar. kenapa?, karena dengan melakukan semua program di atas papan yang sama kebocaran satu hal, akan memengaruhi yang lain sehingga perlu dipisahkan dan task tertentu dapat dilempar ketitik yang lain. 
 
 Menurut analisis kami, menempatkan seluruh komputasi ke dalam satu server adalah sebuah kesalahan karena rentan terkena masalah, karena menciptakan single point of failure(SPOF). Desain yang baik seharusnya sudah mengantisipasi adanya kegagalan pada satu server sehingga dapat diback up oleh yang lain, karena setiap proses berebut resource yang sangat terbatas dari server.
 
-**Dampak ke FoodGo:** 
+### Dampak ke FoodGo:
 
 ada beberapa mekanisme kegagalan yang terjadi
 1. **kehilangan resource:** karena semua modul mulai dari pembayaran, pesanan, dan kurir berada didalam satu sumber, beban yang bertumpu disatu tempat akan menghabiskan seluruh memori yang ada.
@@ -187,7 +187,7 @@ ada beberapa mekanisme kegagalan yang terjadi
 
 3. **Pemulihan yang Buruk:** sesuai dengan Design Goals yaitu maintainbility(Mean Time to Repair(MTTR)) ini adalah hal yang ingin dicapai, namun dari skenario ini kita dapat lihat bahwa goals satu ini tidak tercapai, karena server bergantung dengan restart manual ketika terjadi crash, hal ini  membuat MTTR menjadi sangat tinggi, jadi layanan app akan berhenti lebih lama dari sewajarnya. hal ini dapat menyebabkan banyak pengguna pindah app
 
-**Solusi desain awal:** 
+### Solusi desain awal: 
 
 Kami mendapatkan beberapa ide perbaikan bertahap sesuai prinsip sistem terdistribusi:
 
@@ -197,7 +197,7 @@ Kami mendapatkan beberapa ide perbaikan bertahap sesuai prinsip sistem terdistri
 
 3. **Pemulihan Otomatis:** sebelum nya ketika server crash, manusia lah yang melaukan restart secara manual. Dengan konsep ini ketika health check mendeteksi adanya crash failure, sistem secara otomatis melakukan restart atau melakukan proses app yang baru secara otomatis jika terjadi crash.
 
-**Trade-off:** 
+### Trade-off:
 
 dalam sebuah desain, ada kelebihan pasti ada kekurangan atau side effect, dengaan menerapkan microservice dan redudancy tidak lah datang dengan gratis.
 
@@ -213,3 +213,21 @@ dalam sebuah desain, ada kelebihan pasti ada kekurangan atau side effect, dengaa
 ## Kesimpulan Kelompok
 
 [Ringkasan: jika FoodGo memperbaiki ketiga pitfall ini, apa arsitektur yang disarankan secara garis besar? Kaitkan dengan Tugas 2.]
+
+Berdasarkan analisis ketiga pitfall di atas. kami mendapatkan kesimpulan Foodgo berasal pada masalah fundamental.
+
+1. mengasumsikan bahwa the connection is reliable.
+2. mengasumsikan bahwa the latency is zero.
+3. keterbatasan arsitektur monolitik
+
+jika Foodgo memperbaiki ketiga asumsi di atas. Maka kami menyarankan arsitektur Foodgo dirombak dari arsitektur monolitik menjadi arsitektur terdistribusi(Microservices) yang tangguh dan asinkron.
+
+Untuk mencapai hal ini, arsitektur  yang baru ini harus memiliki:
+1. **Separation of Concerns:** Membagi sistem menjadi beberapa bagian service-service kecil yang independen sehingga sistem menjadi scalable per service dan memungkinkan peluncuran yang independen/
+
+2. **Fault Tolerance Mechanisms:** Menerapakan Timeout, retry dengan exponential  backoff, dan circuit breaker pada synchronous communication untuk mencegah kegagalan(cascading failure).
+
+3. **Asynchronous Communication(message passing):** dengan menggunakan message queue atau message oriented middleware untuk tugas di latar belakang, misal notifikasi kurir. Hal ini memberikan kesempatan kepada pengirim pesan dan penerima tidak harus aktif di waktu yang bersamaan, kemudian memeberikan pemisahan lokasi yaitu pengirim tidak perlu tau lokasi dari penerima untuk  mengirim pesan, sehingga latency tinggi tidak mengganggu service lain.
+
+**Kaitan dengan Tugas 2:**
+setelah diskusi kami, dan jika diterapkan kepada Foodgo akan menjadi sistem terdisribusi yang kompleks, dengan keuntungan nya pasti memiliki beberapa tradeoffs, seperti kompleksitas operasional yang tinggi, dan tantangan menjaga konsistensi data di antara replika.
