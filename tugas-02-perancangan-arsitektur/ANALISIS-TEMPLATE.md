@@ -8,26 +8,17 @@
 | Farrellino Ulung Satya Amando | 103072400005 |  |
 | Haniel Juanta Sembiring | 103072400145 |  |
 
-## 1. Pemilihan Gaya Arsitektur & Justifikasi (Oleh: Nuevalen Refitra Alswanfo)
-Berdasarkan materi Bab 2 (*Distributed Systems*), sistem monolitik FoodGo saat ini mengalami *tight coupling* yang parah, baik secara **temporal** (seluruh modul harus aktif bersamaan) maupun **referential** (modul harus tahu alamat internal satu sama lain). Untuk mengatasinya, kami memilih **Kombinasi Service-Oriented Architecture (SOA) dan Publish-Subscribe**.
+## 1. Pemilihan Gaya Arsitektur dan Justifikasi
 
-**Justifikasi Pemilihan:**
-1. **SOA (RESTful/Request-Response)** dipilih khusus untuk menangani *core services* yang membutuhkan kepastian state secara langsung (*strong consistency*), seperti interaksi antara modul Pesanan dan Pembayaran.
-2. **Publish-Subscribe (Event-Driven)** dipilih untuk menangani proses latar belakang (*background tasks*) seperti notifikasi ke Resto dan Kurir. Dengan adanya *Message Broker* sebagai *middleware*, modul Pesanan menjadi:
-   - *Referentially Decoupled*: Tidak perlu tahu alamat IP atau keberadaan Service Kurir/Resto.
-   - *Temporally Decoupled*: Service Kurir/Resto tidak harus sedang *online* saat event dipublikasikan. Jika sedang di-*deploy* ulang, pesan akan aman diantrekan di broker, sehingga **menghilangkan risiko downtime total** seperti pada sistem monolitik.
+Kami memilih **kombinasi Service-Oriented Architecture (SOA) dan Publish-Subscribe** untuk mengatasi *tight coupling* pada sistem monolitik FoodGo. **SOA** digunakan pada proses utama yang membutuhkan respons langsung dan konsistensi data, seperti komunikasi antara **Order Service** dan **Payment Service**. Sementara itu, **Publish-Subscribe** digunakan untuk proses asinkron seperti notifikasi kepada Resto dan Kurir. Penggunaan *Message Broker* membuat komunikasi lebih *decoupled* karena antarmodul tidak perlu saling mengetahui alamat maupun harus aktif secara bersamaan.
 
-## 3. Alur Skenario End-to-End: Fokus Interaksi Order-Payment (Oleh: Nuevalen Refitra Alswanfo)
-Interaksi antara **Modul Pesanan (Order Service)** dan **Modul Pembayaran (Payment Service)** dirancang secara ketat menggunakan pola komunikasi **Sinkron (Request-Response)** berbasis SOA (misalnya, HTTP POST/REST atau gRPC).
+## 3. Alur Skenario *End-to-End*: Order-Payment
 
-- **Mekanisme Alur**: 
-  1. Pelanggan mengonfirmasi pesanan di *frontend*.
-  2. **Order Service** mengirimkan permintaan pembayaran secara langsung (*direct call*) ke **Payment Service**.
-  3. **Order Service** memasuki keadaan *blocking* (menunggu) hingga **Payment Service** mengembalikan respons eksplisit (misalnya: `HTTP 200 OK` dengan status "LUNAS" atau `HTTP 402` jika dana tidak cukup).
-  4. Hanya jika responsnya "Sukses", Order Service akan melanjutkan ke langkah berikutnya, yaitu mem-*publish* event `OrderCreated` ke Message Broker (Asinkron).
+Kami menggunakan komunikasi **sinkron (*Request-Response*)** antara **Order Service** dan **Payment Service**. Pelanggan melakukan pemesanan → Order Service mengirim permintaan pembayaran → Payment Service memproses dan mengembalikan status pembayaran → jika berhasil, Order Service menerbitkan *event* `OrderCreated` ke *Message Broker* untuk diproses oleh layanan lain.
 
-- **Mengapa Harus Sinkron (Bukan Asinkron/Pub-Sub)?**: 
-   Proses pembayaran adalah transaksi bisnis kritis yang membutuhkan *immediate feedback*. Jika kita menggunakan Pub-Sub (asinkron) untuk pembayaran, sistem akan mengalami *eventual consistency* yang berisiko tinggi: pesanan bisa saja tercatat "dibuat" di database padahal pembayaran sebenarnya gagal, atau pelanggan terjebak dalam ketidakpastian tanpa status transaksi yang *real-time*. Oleh karena itu, *temporal coupling* pada bagian inti ini justru **diperlukan dan tepat** diselesaikan dengan pola SOA, sementara *decoupling* hanya diterapkan pada tahap notifikasi selanjutnya.
+### Alasan Menggunakan Komunikasi Sinkron
+
+Kami memilih komunikasi sinkron karena pembayaran membutuhkan **respons dan kepastian status secara langsung**. Jika menggunakan komunikasi asinkron, status pesanan dan pembayaran berpotensi tidak konsisten karena pembayaran dapat belum selesai ketika pesanan sudah tercatat. Oleh karena itu, **SOA digunakan untuk transaksi kritis**, sedangkan **Publish-Subscribe digunakan untuk proses lanjutan yang tidak membutuhkan respons langsung**.
 
 ---
 
