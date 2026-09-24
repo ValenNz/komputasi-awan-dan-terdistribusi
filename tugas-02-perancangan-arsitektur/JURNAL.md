@@ -1,9 +1,11 @@
 # Jurnal Proses — Tugas 2
 
-## [Tanggal]
-- Opsi arsitektur yang dipertimbangkan: ...
-- Kenapa akhirnya pilih [SOA/Pub-Sub]: ...
-- Revisi diagram (versi 1 → versi 2, apa yang berubah dan kenapa): ...
+## 24 September 2026
+**Kontribusi: Nuevalen Refitra Alswanfo (103072430008)**
+- **Fokus Tugas**: Pemilihan Gaya Arsitektur & Core Services (Justifikasi SOA/Pub-Sub dan alur Order-Payment).
+- **Analisis Awal**: Menganalisis masalah *coupling* pada sistem monolitik FoodGo menggunakan kerangka pikir Bab 2 (Temporal & Referential Coupling). Menyimpulkan bahwa *pure Pub-Sub* tidak cocok untuk pembayaran karena risiko *eventual consistency* pada transaksi finansial.
+- **Keputusan Desain**: Merumuskan justifikasi mengapa kombinasi SOA (untuk transaksi kritis/sinkron) dan Pub-Sub (untuk notifikasi/asinkron) adalah solusi optimal untuk mencapai *decoupling* tanpa mengorbankan integritas data pembayaran.
+- **Penulisan**: Menyusun paragraf justifikasi arsitektur dan deskripsi mendetail mengenai interaksi *blocking request-response* antara Order Service dan Payment Service di `README.md`.
 
 ## Log Penggunaan AI (Level 2)
 
