@@ -9,8 +9,9 @@
 
 ## 26 September 2026
 **Kontribusi: Haniel Juanta Sembiring (103072400145)**
-- **Fokus Tugas**: Analisis Trade-Off dan solusi Coupling
-- **Desain Integrasi**: Memetakan alur lomu 
+- **Analisis Trade-Off**: menulikasan dan merumuskan analisis mendalam terkait trade-off dari arsitektur yang dipili oleh kami, seperti kompleksitas debugging, pelacakan eror yang tidak liner, dan masalah konsitensi data(eventual consitency).
+- **Integrasi Peripheral**: Merancang dan menjelaskan bagaimana interaksi antara modul Kurir/Notifikasi dan Katalog Resto dilakukan secara asinkron menggunakan Message Broker.
+- **Manajemen Administrasi Tugas**: Bertanggung jawab penuh atas koordinasi dan pengisian log kegiatan di dalam file.
 
 ## Log Penggunaan AI (Level 2)
 
