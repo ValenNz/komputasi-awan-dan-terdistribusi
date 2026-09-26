@@ -13,6 +13,7 @@
 - **Integrasi Peripheral**: Merancang dan menjelaskan bagaimana interaksi antara modul Kurir/Notifikasi dan Katalog Resto dilakukan secara asinkron menggunakan Message Broker.
 - **Manajemen Administrasi Tugas**: Bertanggung jawab penuh atas koordinasi dan pengisian log kegiatan di dalam file.
 
+
 **Kontribusi: Farrellino Ulung Satya Amando (103072400005)**
 - **Visualisasi Diagram**: Merancang dan memfinalisasi diagram arsitektur terdesentralisasi FoodGo yang merepresentasikan transisi dari sistem monolitik ke hibrida (SOA & Pub-Sub). Diagram ini mencakup komponen Client, Order Service, Payment Service, Message Broker, Catalog Service (Resto), dan Notification Service (Kurir) dengan pelabelan komunikasi sinkron dan asinkron yang jelas.
 - **Skenario End-to-End**: Menyusun narasi alur transaksi lengkap langkah demi langkah mulai dari permintaan pemesanan awal oleh pelanggan, validasi pembayaran sinkron, hingga publikasi event asinkron melalui Message Broker ke layanan restoran dan kurir.
@@ -24,4 +25,4 @@
 
 | Tanggal | Tool AI | Prompt yang diberikan | Ringkasan saran/ide AI | Bagaimana diolah jadi tulisan/kode sendiri |
 |---|---|---|---|---|
-| ... | ... | ... | ... | ... |
+| ... | NO AI | ... | ... | ... |
