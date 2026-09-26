@@ -12,7 +12,24 @@
 
 Kami memilih **kombinasi Service-Oriented Architecture (SOA) dan Publish-Subscribe** untuk mengatasi *tight coupling* pada sistem monolitik FoodGo. **SOA** digunakan pada proses utama yang membutuhkan respons langsung dan konsistensi data, seperti komunikasi antara **Order Service** dan **Payment Service**. Sementara itu, **Publish-Subscribe** digunakan untuk proses asinkron seperti notifikasi kepada Resto dan Kurir. Penggunaan *Message Broker* membuat komunikasi lebih *decoupled* karena antarmodul tidak perlu saling mengetahui alamat maupun harus aktif secara bersamaan.
 
-## 2.
+## 2. Skenario end-to-end Sistem dengan Arsiteltur Ini 
+
+1. **Inisiasi Pesanan (Pelanggan → Order Service)**
+* Pelanggan melakukan pemesanan melalui aplikasi, yang mengirimkan **1. Pesan (HTTP Request)** secara sinkron ke **Order Service (SOA/Sinkron)** untuk mencatat transaksi awal.
+
+
+2. **Pemrosesan Pembayaran dan Validasi Pembayaran (Order Service ⇄ Payment Service)**
+* Untuk memastikan integritas finansial dan menghindari masalah eventual consistency, Order Service mengirimkan **2. Request Pembayaran (Sinkron)** ke **Payment Service (SOA/Sinkron)**.
+* Setelah pembayaran divalidasi, Payment Service mengembalikan respons **3. Status: Berhasil (Sinkron)** ke Order Service.
+
+
+3. **Distribusi Event Asinkron (Order Service → Message Broker)**
+* Setelah pembayaran sukses, Order Service melakukan publish event dengan mengirimkan **4. Publish Event: 'OrderCreated'** secara asinkron ke **Message Broker (Pub-Sub/Asinkron)** supaya tidak terjadi blocking pada main service.
+
+
+4. **Konsumsi Event oleh Periferal (Message Broker → Catalog & Notification Service)**
+* **Catalog Service (Resto)** akan menerima event dengan melakukan **5. Subscribe 'OrderCreated'** untuk memproses pembuatan makanan di sisi restoran.
+* Di saat yang bersamaan, **Notification Service (Kurir)** juga melakukan **6. Subscribe 'OrderCreated'** untuk mempersiapkan tugas penjemputan dan pengiriman bagi kurir secara asinkron.
 
 ## 3. Alur Skenario *End-to-End*: Order-Payment
 
