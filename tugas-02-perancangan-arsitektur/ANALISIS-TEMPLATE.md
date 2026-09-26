@@ -1,23 +1,11 @@
 # Tugas 1 — Analisis ***** FoodGo
 
-**Kelompok:** [nama kelompok]
 
 | Nama | NIM | Kontribusi |
 |---|---|---|
-| Nuevalen Refitra Alswanado | 103072430008 | - **Fokus Tugas**: Pemilihan Gaya Arsitektur & Core Services (Justifikasi SOA/Pub-Sub dan alur Order-Payment).
-- **Analisis Awal**: Menganalisis masalah *coupling* pada sistem monolitik FoodGo menggunakan kerangka pikir Bab 2 (Temporal & Referential Coupling). Menyimpulkan bahwa *pure Pub-Sub* tidak cocok untuk pembayaran karena risiko *eventual consistency* pada transaksi finansial.
-- **Keputusan Desain**: Merumuskan justifikasi mengapa kombinasi SOA (untuk transaksi kritis/sinkron) dan Pub-Sub (untuk notifikasi/asinkron) adalah solusi optimal untuk mencapai *decoupling* tanpa mengorbankan integritas data pembayaran.
-- **Penulisan**: Menyusun paragraf justifikasi arsitektur dan deskripsi mendetail mengenai interaksi *blocking request-response* antara Order Service dan Payment Service di `README.md`.  |
-
-
-| Haniel Juanta Sembiring | 103072400145 | - **Analisis Trade-Off**: menulikasan dan merumuskan analisis mendalam terkait trade-off dari arsitektur yang dipili oleh kami, seperti kompleksitas debugging, pelacakan eror yang tidak liner, dan masalah konsitensi data(eventual consitency).
-- **Integrasi Peripheral**: Merancang dan menjelaskan bagaimana interaksi antara modul Kurir/Notifikasi dan Katalog Resto dilakukan secara asinkron menggunakan Message Broker.
-- **Manajemen Administrasi Tugas**: Bertanggung jawab penuh atas koordinasi dan pengisian log kegiatan di dalam file. |
-
-
-| Farrellino Ulung Satya Amando | 103072400005 | - **Visualisasi Diagram**: Merancang dan memfinalisasi diagram arsitektur terdesentralisasi FoodGo yang merepresentasikan transisi dari sistem monolitik ke hibrida (SOA & Pub-Sub). Diagram ini mencakup komponen Client, Order Service, Payment Service, Message Broker, Catalog Service (Resto), dan Notification Service (Kurir) dengan pelabelan komunikasi sinkron dan asinkron yang jelas.
-- **Skenario End-to-End**: Menyusun narasi alur transaksi lengkap langkah demi langkah mulai dari permintaan pemesanan awal oleh pelanggan, validasi pembayaran sinkron, hingga publikasi event asinkron melalui Message Broker ke layanan restoran dan kurir.|
-
+| Nuevalen Refitra Alswanado | 103072430008 | Di file JURNAL.md |
+| Farrellino Ulung Satya Amando | 103072400005 | Di file JURNAL.md |
+| Haniel Juanta Sembiring | 103072400145 | Di file JURNAL.md |
 
 ## 1. Pemilihan Gaya Arsitektur dan Justifikasi
 
@@ -25,20 +13,20 @@ Kami memilih **kombinasi Service-Oriented Architecture (SOA) dan Publish-Subscri
 
 ## 2. Skenario end-to-end Sistem dengan Arsiteltur Ini 
 
-1. **Inisiasi Pesanan (Pelanggan → Order Service)**
+1. **Inisiasi Pesanan (Pelanggan -> Order Service)**
 * Pelanggan melakukan pemesanan melalui aplikasi, yang mengirimkan **1. Pesan (HTTP Request)** secara sinkron ke **Order Service (SOA/Sinkron)** untuk mencatat transaksi awal.
 
 
-2. **Pemrosesan Pembayaran dan Validasi Pembayaran (Order Service ⇄ Payment Service)**
+2. **Pemrosesan Pembayaran dan Validasi Pembayaran (Order Service -> Payment Service dan Payment Service -> Order Service)**
 * Untuk memastikan integritas finansial dan menghindari masalah eventual consistency, Order Service mengirimkan **2. Request Pembayaran (Sinkron)** ke **Payment Service (SOA/Sinkron)**.
 * Setelah pembayaran divalidasi, Payment Service mengembalikan respons **3. Status: Berhasil (Sinkron)** ke Order Service.
 
 
-3. **Distribusi Event Asinkron (Order Service → Message Broker)**
+3. **Distribusi Event Asinkron (Order Service -> Message Broker)**
 * Setelah pembayaran sukses, Order Service melakukan publish event dengan mengirimkan **4. Publish Event: 'OrderCreated'** secara asinkron ke **Message Broker (Pub-Sub/Asinkron)** supaya tidak terjadi blocking pada main service.
 
 
-4. **Konsumsi Event oleh Periferal (Message Broker → Catalog & Notification Service)**
+4. **Konsumsi Event oleh Periferal (Message Broker -> Catalog & Notification Service)**
 * **Catalog Service (Resto)** akan menerima event dengan melakukan **5. Subscribe 'OrderCreated'** untuk memproses pembuatan makanan di sisi restoran.
 * Di saat yang bersamaan, **Notification Service (Kurir)** juga melakukan **6. Subscribe 'OrderCreated'** untuk mempersiapkan tugas penjemputan dan pengiriman bagi kurir secara asinkron.
 
@@ -76,4 +64,4 @@ Kami memilih komunikasi sinkron karena pembayaran membutuhkan **respons dan kepa
 ## Kesimpulan Kelompok
 Perancangan arsitektur hibrida yang memadukan Service-Oriented Architecture (SOA) dan Publish-Subscribe pada sistem FoodGo memberikan nilai tambah yang signifikan dalam hal fleksibilitas operasional dan ketahanan sistem. Pendekatan ini merupakan solusi untuk menangani  tight coupling melalui temporal dan referential decoupling, di mana modul perifer seperti restoran dan kurir dapat berjalan secara mandiri dan asinkron tanpa membebani layanan utama. 
 
-Selain itu, integritas finansial juga akan tetap terjaga secara optimal melalui komunikasi sinkron yang ketat antara layanan Order dan Payment. Arsitektur ini mempunyai sedikit kelemahan yaitu peningkatan kompleksitas debugging karena alur eksekusi yang tidak lagi linier dan juga ketergantungan operasional pada Message Broker. Walaupun begit, manfaat skalabilitas dan konsistensi data yang didapatkan tetap jauh lebih unggul yang membuat model hybrid ini solusi yang efektif untuk masalah dari sistem FoodGo.
+Selain itu, integritas finansial juga akan tetap terjaga secara optimal melalui komunikasi sinkron yang ketat antara layanan Order dan Payment. Arsitektur ini mempunyai sedikit kelemahan yaitu peningkatan kompleksitas debugging karena alur eksekusi yang tidak lagi linier dan juga ketergantungan operasional pada Message Broker. Walaupun begit, manfaat skalabilitas dan konsistensi data yang didapatkan tetap jauh lebih unggul, menjadikan model hybrid ini solusi yang efektif untuk masalah dari sistem FoodGo.
