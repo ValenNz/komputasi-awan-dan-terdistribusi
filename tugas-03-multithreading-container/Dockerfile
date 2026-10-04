@@ -1,13 +1,17 @@
-# TODO 1: Pilih base image Python resmi yang ringan (cari tag "slim" di Docker Hub).
-FROM python:__ISI_VERSI__-slim
+FROM python:3.11-slim
+
+LABEL maintainer="farrellinoulung@gmail.com"
+LABEL description="FoodGo Order Simulator - Multithreading & Race Condition Demo"
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
 
 WORKDIR /app
 
 COPY requirements.txt .
-# TODO 2: Tulis perintah untuk install dependency dari requirements.txt.
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
 COPY src/ ./src/
 
-# TODO 3: Tulis perintah default yang dijalankan saat container start,
-# yaitu menjalankan src/order_simulator.py dengan python3.
-CMD ["__LENGKAPI_INI__"]
+CMD ["python", "src/order_simulator.py"]

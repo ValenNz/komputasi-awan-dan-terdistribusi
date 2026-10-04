@@ -1,0 +1,11 @@
+bukti/
+.git/
+.gitignore
+.vscode/
+.idea/
+__pycache__/
+*.pyc
+JURNAL.md
+README.md
+Dockerfile
+.dockerignore
