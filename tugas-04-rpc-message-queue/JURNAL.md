@@ -14,8 +14,8 @@ h
 ## Jalur yang dipilih
 - **Keduanya (Jalur A: RPC + Jalur B: Message Queue)**
 - Alasan: Kami ingin memahami kedua paradigma komunikasi untuk kasus FoodGo yang berbeda kebutuhannya.
-  - **Jalur A (RPC)** — dikerjakan Nuevalen: cocok untuk operasi kritis seperti "Cek Saldo" yang butuh respons instan.
-  - **Jalur B (Message Queue)** — dikerjakan Farrellino (infrastruktur & publisher) dan Haniel (consumer & uji decoupling): cocok untuk notifikasi asinkron seperti "Kirim notifikasi ke kurir" agar modul Pembayaran tidak terhambat.
+  - **Jalur A (RPC)**, dikerjakan Nuevalen: cocok untuk operasi kritis seperti "Cek Saldo" yang butuh respons instan.
+  - **Jalur B (Message Queue)**, dikerjakan Farrellino (infrastruktur & publisher) dan Haniel (consumer & uji decoupling): cocok untuk notifikasi asinkron seperti "Kirim notifikasi ke kurir" agar modul Pembayaran tidak terhambat.
 
 ## Kendala teknis
 - Error saat setup (mis. koneksi RabbitMQ ditolak, port bentrok): ...
