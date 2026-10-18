@@ -34,4 +34,6 @@ Node 1, 2, dan 3 menerima broadcast COORDINATOR dari Node 4 dan memperbarui stat
 
 | Tanggal | Tool AI | Prompt yang diberikan | Ringkasan saran/ide AI | Bagaimana diolah jadi tulisan/kode sendiri |
 |---|---|---|---|---|
-| ... | NO AI | ... | ... | ... |
+| 16 Okt 2026 | Gemini | "kenapa sistem butuh leader buat nanganin konflik urutan pesanan?" | AI menyarankan untuk fokus membahas masalah jam fisik yang tidak sinkron dan peran leader sebagai pengatur antrean utama (single source of truth). | Kami menggunakan konsep pengatur antrean tunggal tersebut sebagai kerangka jawaban awal, lalu menuliskannya ulang sesuai pemahaman kelompok kami. |
+| 18 Okt 2026 | Gemini | "bantu jelaskan bedanya algoritma bully sama raft pakai bahasa gampang" | AI memberi poin perbandingan: Bully menang berdasarkan ID tapi boros pesan, Raft pakai voting dan lebih aman untuk data. | Kami membaca ide tersebut untuk bahan diskusi kelompok, lalu mengetik ulang perbandingannya menggunakan bahasa kami sendiri di README. |
+| 18 Okt 2026 | Gemini | "apa aja kelemahan bully algorithm buat kasus kayak foodgo?" | AI memberikan 3 poin utama: masalah jaringan penuh (message storm), jeda tanpa leader saat proses pemilihan, dan sistem tidak stabil jika koneksi memburuk. | Kami mengambil 3 kerangka poin tersebut, menuliskan penjelasannya, dan mencocokkannya dengan hasil log pengujian skenario 2 yang kami jalankan malam harinya. |
