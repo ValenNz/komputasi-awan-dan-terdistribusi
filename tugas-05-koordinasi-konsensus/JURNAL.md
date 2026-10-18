@@ -1,7 +1,5 @@
 # Jurnal Proses — Tugas 5
 
-# Jurnal Proses — Tugas 5
-
 ## Implementasi Bully
 - **Kendala saat mengisi TODO 1-4:** 
   Awalnya kami mencoba menggunakan `time.sleep()` di dalam `start_election()` untuk menunggu balasan `OK`. Namun, hal ini menyebabkan *deadlock* karena thread utama terkunci dan tidak bisa menjalankan `start_server()` untuk menerima pesan `OK` dari node lain di `on_message`. 
