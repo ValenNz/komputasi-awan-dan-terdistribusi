@@ -15,7 +15,7 @@
 ## Skenario 2: Leader dimatikan
 - **Leader baru yang terpilih:** Node 4
 - **Berapa lama waktu sampai leader baru terdeteksi:** Sekitar **3 detik**.
-- **Log/observasi:** Waktu deteksi bergantung pada `time.sleep(3)` di dalam loop `monitor_leader()`. Setelah Node 5 ditekan `Ctrl+C`, Node 4 (dan node lain) yang sedang melakukan `sleep` terbangun, mencoba mengirim `PING` ke port 5005. Karena koneksi ditolak (`ConnectionRefusedError`), `send_message` mengembalikan `False`. Node 4 mereset `leader_id` menjadi `None` dan memicu `start_election()`. Node 4 mengirim `ELECTION` ke node di atasnya (tidak ada), lalu mendeklarasikan diri sebagai `COORDINATOR` baru. Node 1, 2, dan 3 menerima `COORDINATOR` dan memperbarui state mereka.
+- **Log/observasi:** Waktu deteksi bergantung pada `time.sleep(3)` di dalam loop `monitor_leader()`. Setelah Node 5 ditekan `Ctrl+C`, Node 4 (dan node lain) yang sedang melakukan `sleep` terbangun, mencoba mengirim `PING` ke port 5005. Karena koneksi ditolak (`ConnectionRefusedError`), `send_message` mengembalikan `False`. Node 4 mereset `leader_id` menjadi `None` dan memicu `start_election()`. Node 4 mengirim `ELECTION` ke node di atasnya (tidak ada), lalu mendeklarasikan diri sebagai `COORDINATOR` baru. Node 1, 2, dan 3 menerima `COORDINATOR` dan memperbarui state mereka.==
 
 ## Log Penggunaan AI (Level 2)
 
