@@ -23,15 +23,15 @@ Setiap anggota mendapat **3 tanggung jawab seimbang**:
 
 | Nama | NIM | 🧩 Coding (TODO) | 🧪 Testing Skenario | 📝 Dokumentasi |
 | :--- | :--- | :--- | :--- | :--- |
+| **Nuevalen Refitra Alswanfo** | 103072430008 | `register_kurir()` (TODO 7) + `lookup()` (TODO 8) — operasi data | **Skenario Leave**: Node `node-jakarta-1` keluar, verifikasi data berpindah ke successor | **README bagian 3**: Penjelasan mekanisme `leave` + **JURNAL.md** lengkap |
 | **Haniel Juanta Sembiring** | 103072400145 | `find_successor()` (TODO 6) — jantung algoritma Chord | **Skenario Awal**: 4 node join + register 3 kurir, verifikasi lookup bekerja | **README bagian 1**: Analisis "Kenapa DHT vs flat naming/DNS" (kaitkan ke kasus IP kurir dinamis) |
 | **FARRELLINO ULUNG SATYA AMANDO** | 103072400005 | `join()` (TODO 1,2,3) + `leave()` (TODO 4,5) — perubahan topologi | **Skenario Join**: Node baru `node-medan-1` bergabung, verifikasi data berpindah tanggung jawab | **README bagian 2**: Diagram ring topology (Mermaid) + penjelasan node penanggung jawab |
-| **Nuevalen Refitra Alswanfo** | 103072430008 | `register_kurir()` (TODO 7) + `lookup()` (TODO 8) — operasi data | **Skenario Leave**: Node `node-jakarta-1` keluar, verifikasi data berpindah ke successor | **README bagian 3**: Penjelasan mekanisme `leave` + **JURNAL.md** lengkap |
 
 ### ⚖️ Kenapa Pembagian Ini Adil?
 
-1. **Beban coding seimbang**: Haniel (1 fungsi inti tapi kompleks), Farrellino (2 fungsi terkait), Nuevalen (2 fungsi sederhana).
+1. **Beban coding seimbang**: Nuevalen (2 fungsi operasi data), Haniel (1 fungsi inti yang kompleks), Farrellino (2 fungsi perubahan topologi).
 2. **Setiap orang testing skenario berbeda**: tidak ada yang cuma "run program".
-3. **Setiap orang menulis bagian README berbeda**: tidak ada yang cuma ngerjain docs.
+3. **Setiap orang menulis bagian README berbeda**: tidak ada yang cuma ngerjain dokumentasi.
 4. **Ketergantungan logis**: `find_successor` (Haniel) dibutuhkan oleh `join/leave` (Farrellino) dan `register/lookup` (Nuevalen) → kerja sama tim wajib.
 
 ---
@@ -46,33 +46,7 @@ Baca bersama:
 
 ### Langkah 2: Kerja Individu — Coding (1–2 Hari)
 
-#### 🧩 Haniel — `find_successor()` (TODO 6)
-```python
-def find_successor(self, key_hash: int) -> int:
-    # Cari node_id TERKECIL yang >= key_hash
-    # Jika tidak ada, wrap-around ke node dengan hash terkecil
-    candidates = [nid for nid in self.nodes.keys() if nid >= key_hash]
-    if candidates:
-        return min(candidates)
-    return min(self.nodes.keys())  # wrap-around
-```
-**Tips:** Ini fungsi paling kritis — semua fungsi lain bergantung padanya. Test manual dengan print hasil hash beberapa node dulu.
-
-#### 🧩 Farrellino — `join()` (TODO 1,2,3) + `leave()` (TODO 4,5)
-```python
-def join(self, node_name: str, node_ip: str):
-    node_id = hash_id(node_name)
-    # 1. Tambahkan ke self.nodes
-    # 2. Cari successor LAMA (sebelum node ini masuk) — sementara hapus node_id dari self.nodes saat mencari
-    # 3. Pindahkan data dari successor lama ke node baru (key dengan hash <= node_id)
-    
-def leave(self, node_name: str):
-    node_id = hash_id(node_name)
-    # 1. Hapus dari self.nodes
-    # 2. Cari successor BARU untuk tiap key yang dipegang node ini
-    # 3. Pindahkan data ke successor baru
-```
-**Tips:** Untuk `join`, sementara hapus `node_id` dari `self.nodes` sebelum panggil `find_successor`, supaya tidak menemukan dirinya sendiri.
+> ⚠️ **Catatan:** Haniel disarankan menyelesaikan `find_successor` terlebih dahulu, karena fungsi ini dibutuhkan oleh Nuevalen dan Farrellino.
 
 #### 🧩 Nuevalen — `register_kurir()` (TODO 7) + `lookup()` (TODO 8)
 ```python
@@ -91,9 +65,46 @@ def lookup(self, kurir_id: str) -> str | None:
 ```
 **Tips:** Pastikan `register_kurir` dipanggil SETELAH semua node join, supaya successor sudah stabil.
 
+#### 🧩 Haniel — `find_successor()` (TODO 6)
+```python
+def find_successor(self, key_hash: int) -> int:
+    # Cari node_id TERKECIL yang >= key_hash
+    # Jika tidak ada, wrap-around ke node dengan hash terkecil
+    candidates = [nid for nid in self.nodes.keys() if nid >= key_hash]
+    if candidates:
+        return min(candidates)
+    return min(self.nodes.keys())  # wrap-around
+```
+**Tips:** Ini fungsi paling kritis. Test manual dengan print hasil hash beberapa node dulu.
+
+#### 🧩 Farrellino — `join()` (TODO 1,2,3) + `leave()` (TODO 4,5)
+```python
+def join(self, node_name: str, node_ip: str):
+    node_id = hash_id(node_name)
+    # 1. Tambahkan ke self.nodes
+    # 2. Cari successor LAMA (sebelum node ini masuk) — sementara hapus node_id dari self.nodes saat mencari
+    # 3. Pindahkan data dari successor lama ke node baru (key dengan hash <= node_id)
+    
+def leave(self, node_name: str):
+    node_id = hash_id(node_name)
+    # 1. Hapus dari self.nodes
+    # 2. Cari successor BARU untuk tiap key yang dipegang node ini
+    # 3. Pindahkan data ke successor baru
+```
+**Tips:** Untuk `join`, sementara hapus `node_id` dari `self.nodes` sebelum panggil `find_successor`, supaya tidak menemukan dirinya sendiri.
+
 ### Langkah 3: Integrasi & Testing (45–60 menit, SEMUA ANGGOTA)
 
 Lakukan sesi **live testing bersama** (screen share atau 1 ruangan):
+
+#### 🧪 Nuevalen — Test Skenario Leave
+```bash
+python3 src/chord_simulation.py
+```
+**Yang harus diverifikasi:**
+- Saat `node-jakarta-1` leave, log menunjukkan data dipindahkan ke successor.
+- `kurir-001` dan `kurir-002` masih bisa di-lookup (di node lain).
+- **Ambil screenshot output** → simpan di `bukti/skenario_leave.png`.
 
 #### 🧪 Haniel — Test Skenario Awal
 ```bash
@@ -113,16 +124,11 @@ python3 src/chord_simulation.py
 - `kurir-001` masih bisa di-lookup (mungkin di node berbeda sekarang).
 - **Ambil screenshot output** → simpan di `bukti/skenario_join.png`.
 
-#### 🧪 Nuevalen — Test Skenario Leave
-```bash
-python3 src/chord_simulation.py
-```
-**Yang harus diverifikasi:**
-- Saat `node-jakarta-1` leave, log menunjukkan data dipindahkan ke successor.
-- `kurir-001` dan `kurir-002` masih bisa di-lookup (di node lain).
-- **Ambil screenshot output** → simpan di `bukti/skenario_leave.png`.
-
 ### Langkah 4: Dokumentasi (1 Hari)
+
+#### 📝 Nuevalen — README Bagian 3 + JURNAL.md
+- Jelaskan mekanisme `leave`: siapa yang ambil alih data, kenapa successor yang ambil.
+- Lengkapi `JURNAL.md` dengan kendala & solusi selama coding.
 
 #### 📝 Haniel — README Bagian 1
 Tulis analisis **kenapa DHT lebih cocok** untuk kasus FoodGo:
@@ -142,10 +148,6 @@ graph LR
 ```
 Tandai node mana bertanggung jawab atas kurir mana (berdasarkan hash kurir).
 
-#### 📝 Nuevalen — README Bagian 3 + JURNAL.md
-- Jelaskan mekanisme `leave`: siapa yang ambil alih data, kenapa successor yang ambil.
-- Lengkapi `JURNAL.md` dengan kendala & solusi selama coding.
-
 ### Langkah 5: Git Commit (Wajib dari Laptop Masing-Masing)
 
 Lihat bagian **Rekomendasi Commit** di bawah.
@@ -163,7 +165,7 @@ python3 src/chord_simulation.py
 ```
 
 **Output yang diharapkan:**
-```
+```text
 [Node] 'node-jakarta-1' (id=XX) bergabung, alamat 10.0.0.1
 [Node] 'node-jakarta-2' (id=XX) bergabung, alamat 10.0.0.2
 ...
@@ -186,16 +188,16 @@ kurir-001 -> 192.168.1.10
 
 ## 📁 Struktur Submission
 
-```
+```text
 tugas-06-penamaan-dht/
 ├── README.md              # Analisis + diagram ring (dibagi 3 bagian)
 ├── JURNAL.md              # Diisi Nuevalen, di-review semua
 ├── src/
 │   └── chord_simulation.py  # Implementasi TODO 1-8
 └── bukti/
+    ├── skenario_leave.png   # Nuevalen
     ├── skenario_awal.png    # Haniel
-    ├── skenario_join.png    # Farrellino
-    └── skenario_leave.png   # Nuevalen
+    └── skenario_join.png    # Farrellino
 ```
 
 ---
@@ -204,9 +206,9 @@ tugas-06-penamaan-dht/
 
 | Komponen | Bobot | Penanggung Jawab Utama |
 |---|---|---|
-| Implementasi lookup/join/leave benar | 35% | **Haniel** (find_successor), **Farrellino** (join/leave), **Nuevalen** (register/lookup) |
-| Bukti perubahan topologi (join/leave) | 25% | **Farrellino** (join), **Nuevalen** (leave) |
-| Analisis DHT vs flat naming/DNS | 25% | **Haniel** (analisis), **Farrellino** (diagram), **Nuevalen** (mekanisme leave) |
+| Implementasi lookup/join/leave benar | 35% | **Nuevalen** (register/lookup), **Haniel** (find_successor), **Farrellino** (join/leave) |
+| Bukti perubahan topologi (join/leave) | 25% | **Nuevalen** (leave), **Farrellino** (join) |
+| Analisis DHT vs flat naming/DNS | 25% | **Nuevalen** (mekanisme leave), **Haniel** (analisis), **Farrellino** (diagram) |
 | Proses & kontribusi kelompok | 15% | **Semua** (commit history + JURNAL.md) |
 
 ---
@@ -216,31 +218,31 @@ tugas-06-penamaan-dht/
 ```markdown
 # Jurnal Proses — Tugas 6
 
+## Implementasi register_kurir & lookup
+- Kesalahan pertama: [mis. lupa memastikan find_successor sudah return integer yang valid]
+- Cara memperbaiki: [memastikan mapping self.data disimpan dengan key_hash yang benar]
+
 ## Implementasi find_successor
 - Kesalahan pertama: [mis. lupa handle wrap-around saat key_hash > semua node_id]
 - Cara memperbaiki: [tambahkan kondisi `if not candidates: return min(self.nodes.keys())`]
 
-## Implementasi join
+## Implementasi join & leave
 - Kesalahan pertama: [mis. successor lama menemukan dirinya sendiri karena node_id sudah di-add]
 - Cara memperbaiki: [sementara hapus node_id dari self.nodes sebelum panggil find_successor]
-
-## Implementasi leave
-- Kesalahan pertama: [mis. data tidak dipindahkan karena lupa iterasi self.data]
-- Cara memperbaiki: [filter self.data untuk key yang successor-nya == node yang keluar]
 
 ## Skenario Awal
 - Hash node: node-jakarta-1=XX, node-jakarta-2=XX, dst.
 - Hash kurir: kurir-001=XX, kurir-002=XX, kurir-003=XX
 - Lookup berhasil: ✅
 
-## Skenario Join
-- Node baru: node-medan-1 (hash=XX)
-- Data yang berpindah: [sebutkan key mana]
-- Lookup tetap berhasil: ✅
-
 ## Skenario Leave
 - Node keluar: node-jakarta-1 (hash=XX)
 - Successor yang ambil alih: [sebutkan node]
+- Lookup tetap berhasil: ✅
+
+## Skenario Join
+- Node baru: node-medan-1 (hash=XX)
+- Data yang berpindah: [sebutkan key mana]
 - Lookup tetap berhasil: ✅
 ```
 
@@ -248,33 +250,7 @@ tugas-06-penamaan-dht/
 
 ## 📋 Rekomendasi Commit
 
-### Commit 1 — Haniel
-```bash
-git add src/chord_simulation.py
-git commit -m "feat(chord): implementasi find_successor dengan wrap-around
-
-- Cari node_id terkecil yang >= key_hash
-- Handle wrap-around ke node dengan hash terkecil jika tidak ada kandidat
-- Fungsi inti yang dibutuhkan join/leave/register/lookup
-
-Co-authored-by: Haniel Juanta Sembiring <103072400145>"
-git push origin main
-```
-
-### Commit 2 — Farrellino
-```bash
-git add src/chord_simulation.py
-git commit -m "feat(chord): implementasi join & leave untuk perubahan topologi
-
-- join: tambah node, cari successor lama, pindahkan data yang jadi tanggung jawab node baru
-- leave: hapus node, pindahkan semua data ke successor baru
-- Log perpindahan data untuk debugging & bukti
-
-Co-authored-by: FARRELLINO ULUNG SATYA AMANDO <103072400005>"
-git push origin main
-```
-
-### Commit 3 — Nuevalen
+### Commit 1 — Nuevalen (Coding)
 ```bash
 git add src/chord_simulation.py
 git commit -m "feat(chord): implementasi register_kurir & lookup
@@ -287,7 +263,46 @@ Co-authored-by: Nuevalen Refitra Alswanfo <103072430008>"
 git push origin main
 ```
 
-### Commit 4 — Haniel (Testing + README bagian 1)
+### Commit 2 — Haniel (Coding)
+```bash
+git add src/chord_simulation.py
+git commit -m "feat(chord): implementasi find_successor dengan wrap-around
+
+- Cari node_id terkecil yang >= key_hash
+- Handle wrap-around ke node dengan hash terkecil jika tidak ada kandidat
+- Fungsi inti yang dibutuhkan join/leave/register/lookup
+
+Co-authored-by: Haniel Juanta Sembiring <103072400145>"
+git push origin main
+```
+
+### Commit 3 — Farrellino (Coding)
+```bash
+git add src/chord_simulation.py
+git commit -m "feat(chord): implementasi join & leave untuk perubahan topologi
+
+- join: tambah node, cari successor lama, pindahkan data yang jadi tanggung jawab node baru
+- leave: hapus node, pindahkan semua data ke successor baru
+- Log perpindahan data untuk debugging & bukti
+
+Co-authored-by: FARRELLINO ULUNG SATYA AMANDO <103072400005>"
+git push origin main
+```
+
+### Commit 4 — Nuevalen (Testing + Docs)
+```bash
+git add bukti/skenario_leave.png README.md JURNAL.md
+git commit -m "test+docs: bukti skenario leave, mekanisme leave, & jurnal proses
+
+- Screenshot output node-jakarta-1 leave + data dipindahkan ke successor
+- Penjelasan mekanisme leave: successor ambil alih data
+- JURNAL.md: kendala & solusi implementasi
+
+Co-authored-by: Nuevalen Refitra Alswanfo <103072430008>"
+git push origin main
+```
+
+### Commit 5 — Haniel (Testing + Docs)
 ```bash
 git add bukti/skenario_awal.png README.md
 git commit -m "test+docs: bukti skenario awal & analisis DHT vs flat naming/DNS
@@ -300,7 +315,7 @@ Co-authored-by: Haniel Juanta Sembiring <103072400145>"
 git push origin main
 ```
 
-### Commit 5 — Farrellino (Testing + README bagian 2)
+### Commit 6 — Farrellino (Testing + Docs)
 ```bash
 git add bukti/skenario_join.png README.md
 git commit -m "test+docs: bukti skenario join & diagram ring topology
@@ -313,20 +328,7 @@ Co-authored-by: FARRELLINO ULUNG SATYA AMANDO <103072400005>"
 git push origin main
 ```
 
-### Commit 6 — Nuevalen (Testing + README bagian 3 + JURNAL)
-```bash
-git add bukti/skenario_leave.png README.md JURNAL.md
-git commit -m "test+docs: bukti skenario leave, mekanisme leave, & jurnal proses
-
-- Screenshot output node-jakarta-1 leave + data dipindahkan ke successor
-- Penjelasan mekanisme leave: successor ambil alih data
-- JURNAL.md: kendala & solusi implementasi find_successor, join, leave
-
-Co-authored-by: Nuevalen Refitra Alswanfo <103072430008>"
-git push origin main
-```
-
-### Commit 7 — Finalisasi (siapa saja)
+### Commit 7 — Finalisasi (Nuevalen / Siapa saja)
 ```bash
 git add .
 git commit -m "chore: finalisasi tugas 6 - penamaan & resolusi lokasi (Chord DHT)
@@ -337,7 +339,38 @@ Semua skenario berhasil:
 ✅ Skenario leave: node-jakarta-1 leave, data dipindahkan ke successor
 
 Kelompok: [Nama Kelompok]
+- Nuevalen Refitra Alswanfo (103072430008)
 - Haniel Juanta Sembiring (103072400145)
-- FARRELLINO ULUNG SATYA AMANDO (103072400005)
-- Nuevalen Refitra Alswanfo (103072430008)"
+- FARRELLINO ULUNG SATYA AMANDO (103072400005)"
 git push origin main
+```
+
+---
+
+## ⚠️ Pengingat Penting
+
+1. **Ketergantungan fungsi**: Haniel harus selesaikan `find_successor` DULU, baru Nuevalen & Farrellino bisa test fungsi mereka dengan sempurna.
+2. **Test manual hash**: Sebelum coding, print hash beberapa node & kurir untuk pahami distribusi:
+   ```python
+   print(hash_id("node-jakarta-1"))  # misal: 42
+   print(hash_id("kurir-001"))       # misal: 150
+   ```
+3. **Wrap-around adalah kunci**: Jangan lupa handle kasus saat `key_hash` lebih besar dari semua node_id → harus kembali ke node dengan hash terkecil.
+4. **Screenshot wajib**: Rubrik 25% di "Bukti perubahan topologi" — tanpa screenshot, nilai maksimal 0 di bagian itu.
+5. **Review silang**: Sebelum push final, setiap anggota WAJIB review kode & docs teman.
+
+---
+
+## ✅ Checklist Akhir
+
+- [ ] `find_successor` bekerja dengan wrap-around (Haniel)
+- [ ] `join` memindahkan data dengan benar (Farrellino)
+- [ ] `leave` memindahkan data ke successor (Farrellino)
+- [ ] `register_kurir` & `lookup` bekerja (Nuevalen)
+- [ ] 3 screenshot di folder `bukti/` (Nuevalen, Haniel, Farrellino)
+- [ ] README lengkap: analisis + diagram + mekanisme leave
+- [ ] JURNAL.md terisi kendala & solusi
+- [ ] 7 commit dari laptop masing-masing
+- [ ] Semua anggota sudah review kode teman
+
+🎯 **Target:** Semua skenario berjalan, semua anggota dapat pengalaman coding + testing + dokumentasi, nilai maksimal di semua rubrik.
