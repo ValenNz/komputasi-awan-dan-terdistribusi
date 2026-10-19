@@ -1,6 +1,6 @@
 """
 Tugas 5 - Simulasi Node untuk Bully Algorithm
-Dikerjakan oleh: Kelompok [Nama Kelompok]
+Dikerjakan oleh: Kelompok 1
 Implementasi penuh oleh: Nuevalen, Haniel, Farrellino
 """
 
