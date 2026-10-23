@@ -56,6 +56,12 @@ class ChordRing:
         ke node dengan hash terkecil di ring (karena ring melingkar)."""
         # TODO 6: implementasikan logika successor di atas menggunakan
         # self.nodes.keys(). Kembalikan node_id (bukan IP).
+        if not self.nodes:
+            return -1
+        candidates = [nid for nid in self.nodes.keys() if nid >= key_hash]
+        if candidates:
+            return min(candidates)
+        return min(self.nodes.keys())  # wrap-around
         pass
 
     def register_kurir(self, kurir_id: str, ip_kurir: str):
