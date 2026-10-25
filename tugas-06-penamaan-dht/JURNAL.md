@@ -5,8 +5,11 @@
 - Cara memperbaikinya: ...
 
 ## Skenario join/leave
-- Hasil sebelum & sesudah node baru bergabung: ...
-- Hasil sebelum & sesudah node keluar: ...
+## Implementasi join/leave (Farrellino)
+- **Kesalahan pertama:** Saat mengimplementasikan `join`, fungsi `find_successor` menemukan `node_id` itu sendiri sebagai successor karena node baru sudah ditambahkan ke `self.nodes` sebelum pencarian dilakukan.
+- **Cara memperbaiki:** Mengubah logika untuk mencari `predecessor` terlebih dahulu dari daftar `self.nodes` yang *belum* mengandung `node_id` baru. Data hanya dipindahkan jika `predecessor_id < key_hash <= node_id`.
+- **Kesalahan kedua:** Pada skenario `leave`, data tidak berpindah saat wrap-around karena logika pencarian successor baru tidak menangani kasus di mana `key_hash` lebih besar dari semua node yang tersisa.
+- **Cara memperbaiki:** Menambahkan kondisi fallback `else: new_succ_id = min(self.nodes.keys())` agar kunci di-wrap-around ke node dengan hash terkecil di ring.
 
 ## Implementasi register_kurir & lookup (Nuevalen)
 - **Kesalahan pertama:** Awalnya bingung bagaimana cara menyimpan data agar tahu node mana yang memegangnya, karena `self.data` hanya mapping `hash -> (kurir_id, ip)`.
@@ -32,4 +35,4 @@
 
 | Tanggal | Tool AI | Prompt yang diberikan | Ringkasan saran/ide AI | Bagaimana diolah jadi tulisan/kode sendiri |
 |---|---|---|---|---|
-| ... | ... | ... | ... | ... |
+| ... | NO AI | ... | ... | ... |
