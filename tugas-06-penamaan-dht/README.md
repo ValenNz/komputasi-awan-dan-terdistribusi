@@ -80,10 +80,81 @@ Untuk melihat bagaimana fungsi `lookup()` pada `src/chord_simulation.py` menemuk
 
 ---
 
-### 2. Diagram Ring Topology dan Node Penanggung Jawab(Farrelino)
+### 2. Diagram Ring Topology dan Node (Farrelino)
+Pada simulasi ini digunakan ruang hash 8-bit (`0–255`). Setiap node bertanggung jawab atas rentang key `(predecessor_id, node_id]` secara searah jarum jam (*clockwise*).
 
+#### a. Kondisi Awal Ring (4 Node & Mapping 5 Kurir)
+
+Urutan node pada ring berdasarkan nilai hash (dari terkecil ke terbesar):
+1. **`node-bandung-1` (`id=40`)**: Menangani rentang hash `(177, 255]` dan `[0, 40]` (*wrap-around*). Menyimpan **`kurir-000` (`hash=183`)** dan **`kurir-002` (`hash=28`)**.
+2. **`node-jakarta-2` (`id=102`)**: Menangani rentang hash `(40, 102]`. Menyimpan **`kurir-001` (`hash=50`)**.
+3. **`node-surabaya-1` (`id=136`)**: Menangani rentang hash `(102, 136]`. Menyimpan **`kurir-012` (`hash=116`)** dan **`kurir-003` (`hash=132`)**.
+4. **`node-jakarta-1` (`id=177`)**: Menangani rentang hash `(136, 177]`.
+
+```mermaid
+graph LR
+    subgraph Chord_Ring_Awal ["Chord Ring 8-bit (0 - 255) — Kondisi Awal"]
+        NB1(("node-bandung-1<br/>(id = 40)")) --> NJ2(("node-jakarta-2<br/>(id = 102)"))
+        NJ2 --> NS1(("node-surabaya-1<br/>(id = 136)"))
+        NS1 --> NJ1(("node-jakarta-1<br/>(id = 177)"))
+        NJ1 -->|Wrap-around 255 ke 0| NB1
+    end
+
+    K000["kurir-000 (hash=183)<br/>IP: 192.168.1.100"] -.->|Wrap-around| NB1
+    K002["kurir-002 (hash=28)<br/>IP: 192.168.1.11"] -.-> NB1
+    K001["kurir-001 (hash=50)<br/>IP: 192.168.1.10"] -.-> NJ2
+    K012["kurir-012 (hash=116)<br/>IP: 192.168.1.13"] -.-> NS1
+    K003["kurir-003 (hash=132)<br/>IP: 192.168.1.12"] -.-> NS1
+```
+
+#### b. Kondisi Ring Setelah Perubahan Topologi (`node-medan-1` Join & `node-jakarta-1` Leave)
+
+- **Saat `node-medan-1` (`id=123`) bergabung (`join`):** Node ini masuk di antara `node-jakarta-2` (`id=102`) dan `node-surabaya-1` (`id=136`). Rentang `(102, 123]` diambil alih oleh `node-medan-1`, sehingga **`kurir-012` (`hash=116`)** berpindah dari `node-surabaya-1` ke `node-medan-1`, sedangkan `kurir-003` (`hash=132`) tetap berada di `node-surabaya-1`.
+- **Saat `node-jakarta-1` (`id=177`) keluar (`leave`):** Tanggung jawab rentang `(136, 177]` diserahkan ke successor berikutnya searah jarum jam (*wrap-around*), yaitu **`node-bandung-1` (`id=40`)**.
+
+```mermaid
+graph LR
+    subgraph Chord_Ring_Akhir ["Chord Ring 8-bit (0 - 255) — Setelah Join & Leave"]
+        NB1(("node-bandung-1<br/>(id = 40)")) --> NJ2(("node-jakarta-2<br/>(id = 102)"))
+        NJ2 --> NM1(("node-medan-1<br/>(id = 123)<br/>[BARU JOIN]"))
+        NM1 --> NS1(("node-surabaya-1<br/>(id = 136)"))
+        NS1 -->|Wrap-around karena id=177 Leave| NB1
+    end
+
+    K000["kurir-000 (hash=183)"] -.-> NB1
+    K002["kurir-002 (hash=28)"] -.-> NB1
+    K001["kurir-001 (hash=50)"] -.-> NJ2
+    K012["kurir-012 (hash=116)<br/>[Pindahan dari node-surabaya-1]"] -.-> NM1
+    K003["kurir-003 (hash=132)"] -.-> NS1
+```
+
+| ID Kurir | Hash Key | Node Awal (4 Node) | Setelah `node-medan-1` (`id=123`) Join | Setelah `node-jakarta-1` (`id=177`) Leave |
+|---|---|---|---|---|
+| `kurir-002` | `28` | `node-bandung-1` (`id=40`) | `node-bandung-1` (`id=40`) | `node-bandung-1` (`id=40`) |
+| `kurir-001` | `50` | `node-jakarta-2` (`id=102`) | `node-jakarta-2` (`id=102`) | `node-jakarta-2` (`id=102`) |
+| `kurir-012` | `116` | `node-surabaya-1` (`id=136`) | **`node-medan-1` (`id=123`)** *(Pindah)* | `node-medan-1` (`id=123`) |
+| `kurir-003` | `132` | `node-surabaya-1` (`id=136`) | `node-surabaya-1` (`id=136`) | `node-surabaya-1` (`id=136`) |
+| `kurir-000` | `183` | `node-bandung-1` (`id=40`) | `node-bandung-1` (`id=40`) | `node-bandung-1` (`id=40`) |
 
 ---
 
 ### 3. Mekanisme Saat Node Keluar (Leave) dari Ring(Nuevalen)
 
+Ketika sebuah node keluar (`leave`) dari jaringan Chord Ring, node tersebut tidak boleh langsung menghapus atau menghilangkan data mapping `ID Kurir -> IP` yang sedang dipegangnya. Sesuai aturan *consistent hashing* pada Chord, seluruh key yang sebelumnya menjadi tanggung jawab node yang keluar harus diserahkan (*migrasi*) kepada **successor berikutnya** di dalam ring (yaitu node aktif dengan ID terkecil yang lebih besar dari key tersebut, atau *wrap-around* ke node dengan ID terkecil di ring apabila tidak ada lagi node dengan ID yang lebih besar).
+
+Secara algoritma pada fungsi `leave(node_name)` di `src/chord_simulation.py`, proses yang terjadi saat `node-jakarta-1` keluar adalah:
+1. Program mengidentifikasi `node_id` dari node yang akan keluar (`node-jakarta-1` memiliki `id=177`), lalu mencari seluruh key kurir di `self.data` yang memiliki `owner_id == 177` ke dalam list `keys_to_move`.
+2. Node `177` dihapus dari daftar node aktif (`del self.nodes[177]`), sehingga node yang tersisa di ring adalah `node-bandung-1` (`40`), `node-jakarta-2` (`102`), `node-medan-1` (`123`), dan `node-surabaya-1` (`136`).
+3. Untuk setiap key di dalam `keys_to_move`, program mencari successor baru di antara node yang tersisa. Karena key yang tadinya berada di `node-jakarta-1` berada di rentang `(136, 177]` (lebih besar daripada ID node tertinggi yang tersisa yaitu `136`), maka pencarian kandidat `nid >= k` menghasilkan list kosong dan program mengeksekusi *fallback wrap-around* `min(self.nodes.keys())`, yaitu **`node-bandung-1` (`id=40`)**.
+4. Akibatnya, rentang tanggung jawab `node-bandung-1` (`id=40`) melebar dari semula `(177, 255] U [0, 40]` menjadi **`(136, 255] U [0, 40]`**.
+
+#### Bukti Output Program (`chord_simulation.py`):
+```text
+=== Skenario Leave: Node Keluar ===
+[Node] 'node-jakarta-1' (id=177) keluar dari ring
+
+--- Lookup setelah Leave ---
+[Lookup] kurir-000 (hash=183) ditemukan di node-bandung-1 -> 192.168.1.100
+[Lookup] kurir-001 (hash=50) ditemukan di node-jakarta-2 -> 192.168.1.10
+```
+Pada output di atas, ketika `node-jakarta-1` (`id=177`) keluar dari ring, tanggung jawab segmennya diambil alih oleh successor searah jarum jam yaitu `node-bandung-1` (`id=40`). Pemanggilan `lookup("kurir-000")` (`hash=183`) tetap berhasil diarahkan via *wrap-around* ke `node-bandung-1` (`192.168.1.100`), dan `lookup("kurir-001")` (`hash=50`) tetap berada di `node-jakarta-2` (`192.168.1.10`) tanpa ada data yang hilang.
