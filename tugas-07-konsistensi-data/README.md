@@ -12,7 +12,53 @@ Data saldo *e-wallet* pelanggan FoodGo berbeda antara server wilayah **Jakarta**
 
 1. Tentukan: apakah kasus ini **membutuhkan Sequential Consistency** (semua replika melihat urutan operasi yang sama) atau **cukup Eventual Consistency** (replika akan konsisten "pada akhirnya", boleh sementara berbeda)? Berikan argumen berbasis dampak bisnis (mis. kasus saldo *e-wallet* jauh lebih sensitif dibanding kasus "jumlah like" di media sosial).
 2. Jika kalian menyimpulkan Eventual Consistency saja **tidak cukup** untuk skenario ini, usulkan pendekatan **Client-Centric Consistency** yang relevan (mis. *Read-Your-Writes*: pelanggan yang baru top-up harus selalu melihat saldo terbarunya sendiri, walau replika lain belum sinkron).
-3. Gambarkan **diagram alir urutan (sequence diagram)** yang menunjukkan operasi read/write antara pelanggan, server Jakarta, server Bandung, dan proses replikasi — untuk skenario **tanpa** jaminan konsistensi (bug terjadi) DAN skenario **dengan** solusi yang kalian usulkan (bug teratasi). Pakai Mermaid (`sequenceDiagram`) di `README.md` — lihat contoh cara pakai di Tugas 2.
+
+
+## 2. Visualisasi Alur Konsistensi (Farrellino)
+
+Berikut adalah *Sequence Diagram* yang menggambarkan perbedaan antara skenario *bug* (tanpa jaminan konsistensi) dan skenario *fix* (dengan Read-Your-Writes).
+
+### A. Skenario NAIF - Inconsistent Read (BUG)
+Pada skenario ini, Server Bandung langsung melayani permintaan *read* tanpa memverifikasi apakah datanya sudah sinkron dengan Server Jakarta.
+
+```mermaid
+sequenceDiagram
+    actor P as Pelanggan
+    participant J as Server Jakarta
+    participant B as Server Bandung
+    participant T as Timer Replikasi
+
+    P->>J: 1. top_up user1 50000
+    J->>J: 2. saldo user1 = 50000, versi = 1
+    J-->>P: 3. OK
+    J->>T: 4. jadwalkan replikasi delay 2 detik
+
+    Note over P,B: 0.5 detik kemudian replikasi BELUM jalan
+    P->>B: 5. baca_saldo_naif user1
+    B-->>P: 6. Return 0.0 BUG stale read
+    T->>B: 7. t=2s WRITE saldo=50000 versi=1
+```
+
+### B. Skenario READ-YOUR-WRITES - Fix
+Pada skenario ini, klien menyertakan versi_minimal yang diketahuinya. Server Bandung akan memastikan data lokalnya sudah mencapai versi tersebut sebelum mengembalikan hasil.
+```mermaid
+sequenceDiagram
+    actor P as Pelanggan
+    participant J as Server Jakarta
+    participant B as Server Bandung
+    participant T as Timer Replikasi
+
+    P->>J: 1. top_up user1 20000
+    J->>J: 2. saldo=70000 versi=2
+    J-->>P: 3. OK client simpan versi_minimal=2
+    J->>T: 4. jadwalkan replikasi delay 2 detik
+
+    P->>B: 5. baca_saldo_ryw user1 versi_minimal=2
+    Note right of B: Cek versi_lokal 1 kurang dari versi_minimal 2
+    B->>B: 6. POLLING tunggu replikasi async
+    T->>B: 7. WRITE saldo=70000 versi=2
+    B-->>P: 8. Return 70000 KONSISTEN
+```
 
 ### Bagian 2 — Simulasi (opsional, nilai tambah)
 
