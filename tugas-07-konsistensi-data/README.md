@@ -205,6 +205,50 @@ Baca saldo dari Bandung (naif): 0.0   <-- BUG: stale read
 Baca saldo dari Bandung (RYW): 20000.0   <-- FIX: konsisten
 ```
 
+### Hasil Pengujian & Penelusuran Eksekusi Simulasi (Haniel Juanta Sembiring)
+
+> **Kontributor:** Haniel Juanta Sembiring (103072400145)
+> **Fokus:** Pengujian Simulasi, Bukti Eksekusi (`bukti/output_simulasi.txt`), & Dokumentasi Proses
+
+#### 1. Output Eksekusi Aktual (`src/replica_simulation.py`)
+
+Berikut adalah hasil eksekusi program `src/replica_simulation.py` di terminal (log lengkap tersimpan pada [`bukti/output_simulasi.txt`](bukti/output_simulasi.txt)):
+
+```text
+PS D:\Semester 5\KOMPUTASI AWAN DAN TERDISTRIBUSI\komputasi-awan-dan-terdistribusi\tugas-07-konsistensi-data> py src/replica_simulation.py
+=== Skenario NAIF (tanpa Read-Your-Writes) ===
+[Jakarta] WRITE saldo user1 = 50000.0 (versi 1)
+Baca saldo dari Bandung (naif): 0.0
+[Bandung] WRITE saldo user1 = 50000.0 (versi 1)
+
+=== Skenario dengan Read-Your-Writes ===
+[Jakarta] WRITE saldo user1 = 70000.0 (versi 2)
+[Bandung] WRITE saldo user1 = 70000.0 (versi 2)
+Baca saldo dari Bandung (RYW): 70000.0
+```
+
+#### 2. Penelusuran Alur Kode dan Analisis Hasil Uji
+
+1. **Skenario Naif (`baca_saldo_naif`)**
+   - Saat fungsi `main()` memanggil `system.top_up("user1", 50000)`, nilai `self.version_counter` naik dari `0` menjadi `1`. Replika Jakarta langsung memperbarui saldo `user1` menjadi `50000.0` dengan versi `1` melalui `self.jakarta.write(user_id, saldo_baru, version)`.
+   - Pengiriman data ke replika Bandung tidak dijalankan secara sinkron, melainkan ditunda di background menggunakan `threading.Timer(REPLICATION_DELAY, _replicate)` dengan nilai `REPLICATION_DELAY = 2.0` detik.
+   - Program utama hanya menunggu selama `time.sleep(0.5)` detik lalu langsung memanggil `system.baca_saldo_naif("user1", "Bandung")`. Karena waktu tunggu `0.5` detik lebih singkat daripada delay replikasi `2.0` detik, fungsi `_replicate()` belum dijalankan oleh timer. Akibatnya, `self.bandung.read("user1")` mengambil nilai default `0.0` dari dictionary `self.saldo`.
+   - Kondisi ini merepresentasikan masalah pada studi kasus FoodGo, di mana pelanggan yang baru saja top-up di server Jakarta langsung ditolak transaksinya ketika aplikasi membaca saldo dari server Bandung yang belum menerima replikasi. Baru setelah program menunggu lewat `time.sleep(REPLICATION_DELAY + 0.5)`, thread timer selesai dieksekusi dan mencetak `[Bandung] WRITE saldo user1 = 50000.0 (versi 1)`.
+
+2. **Skenario Read-Your-Writes (`baca_saldo_read_your_writes`)**
+   - Pada bagian kedua, `system.top_up("user1", 20000)` dipanggil pada objek `ReplicationSystem` yang sama. Saldo `user1` di replika Jakarta dihitung dari saldo sebelumnya ditambah nominal top-up baru (`50000.0 + 20000 = 70000.0`) dan disimpan sebagai versi `2`.
+   - Klien mencatat `versi_terakhir = system.version_counter` (bernilai `2`), lalu langsung memanggil `system.baca_saldo_read_your_writes(user_id="user1", server="Bandung", versi_minimal=2)` tanpa jeda `time.sleep` di `main()`.
+   - Di dalam `baca_saldo_read_your_writes()`, server Bandung mengecek versi lokalnya menggunakan kondisi `while replica.get_version(user_id) < versi_minimal:`. Saat fungsi pertama kali masuk, versi di Bandung masih `1` (dari top-up pertama), sedangkan `versi_minimal` yang diminta klien adalah `2`.
+   - Karena versi di Bandung masih tertinggal, pembacaan ditahan di dalam loop dengan jeda `time.sleep(0.2)` detik sambil memantau batas waktu `timeout = REPLICATION_DELAY * 3` (`6.0` detik). Apabila hingga batas timeout replikasi belum juga tiba, fungsi memiliki mekanisme fallback `return self.jakarta.read(user_id)` agar pembacaan dialihkan ke replika Jakarta.
+   - Setelah sekitar 2 detik, thread timer menyelesaikan penulisan `[Bandung] WRITE saldo user1 = 70000.0 (versi 2)`. Nilai `replica.get_version("user1")` di Bandung berubah menjadi `2`, sehingga keluar dari loop `while` dan mengembalikan saldo `70000.0` yang sudah konsisten.
+
+| Parameter Pengujian | Skenario Naif (`baca_saldo_naif`) | Skenario Perbaikan (`baca_saldo_read_your_writes`) |
+|---|---|---|
+| **Operasi Write di Jakarta** | `top_up("user1", 50000)` -> Saldo `50000.0` (`versi 1`) | `top_up("user1", 20000)` -> Saldo `70000.0` (`versi 2`) |
+| **Versi Lokal Bandung Saat Request Baca Masuk** | `versi 0` (belum ada data) | `versi 1` (masih memegang saldo lama `50000.0`) |
+| **Penanganan di Server Bandung** | Langsung baca `self.bandung.read("user1")` tanpa cek versi | Tahan pembacaan (`polling` tiap `0.2s`) sampai `get_version >= 2` |
+| **Hasil Baca Saldo di Bandung** | `0.0` (*stale read* / bug inkonsistensi) | `70000.0` (konsisten sesuai write terakhir klien) |
+
 ---
 
 ## Struktur Submission
@@ -236,4 +280,4 @@ tugas-07-konsistensi-data/
 |---|---|---|---|
 | **Nuevalen Refitra Alswanfo** | 103072430008 | Analisis Sequential vs Eventual, usulan RYW, skenario tambahan GoRide | ✅ Selesai |
 | **Farrellino Ulung Satya Amando** | 103072400005 | Sequence Diagram Mermaid (bug & fix), implementasi `replica_simulation.py` | ✅ Selesai |
-| **Haniel Juanta Sembiring** | 103072400145 | Bukti output simulasi, finalisasi README, penyusunan `JURNAL.md` | ⏳ Menunggu |
+| **Haniel Juanta Sembiring** | 103072400145 | Bukti output simulasi, finalisasi README, penyusunan `JURNAL.md` | ✅ Selesai |

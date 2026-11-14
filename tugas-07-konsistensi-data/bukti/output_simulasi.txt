@@ -1,0 +1,10 @@
+PS D:\Semester 5\KOMPUTASI AWAN DAN TERDISTRIBUSI\komputasi-awan-dan-terdistribusi\tugas-07-konsistensi-data> py src/replica_simulation.py
+=== Skenario NAIF (tanpa Read-Your-Writes) ===
+[Jakarta] WRITE saldo user1 = 50000.0 (versi 1)
+Baca saldo dari Bandung (naif): 0.0
+[Bandung] WRITE saldo user1 = 50000.0 (versi 1)
+
+=== Skenario dengan Read-Your-Writes ===
+[Jakarta] WRITE saldo user1 = 70000.0 (versi 2)
+[Bandung] WRITE saldo user1 = 70000.0 (versi 2)
+Baca saldo dari Bandung (RYW): 70000.0
