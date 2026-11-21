@@ -1,11 +1,20 @@
 # Jurnal Proses — Tugas 7
 
 ## Diskusi pemilihan model konsistensi
-- Argumen yang dipertimbangkan: ...
-- Kesimpulan akhir & alasan: ...
+- Argumen yang dipertimbangkan: Kami membandingkan kebutuhan data antara saldo e-wallet FoodGo dengan fitur non-finansial seperti jumlah like di media sosial. Apabila FoodGo hanya mengandalkan Eventual Consistency, server memang tidak perlu menunggu replikasi selesai saat melayani request, tetapi jeda sinkronisasi antar server (misalnya 2 detik dari Jakarta ke Bandung) membuat pelanggan yang baru top-up berisiko membaca saldo lama (`0.0`) dan gagal memesan makanan, atau sebaliknya membuka celah double-spending. Di sisi lain, penerapan Sequential Consistency penuh untuk semua transaksi di seluruh replika akan mengharuskan pengurutan global pada setiap operasi write sehingga menurunkan throughput dan memperbesar latensi bagi seluruh pengguna.
+- Kesimpulan akhir & alasan: Eventual Consistency murni tidak cukup untuk saldo e-wallet karena data finansial tidak memiliki toleransi terhadap pembacaan saldo yang belum ter-update (stale read). Sebagai solusi yang lebih efisien dibanding memaksakan sinkronisasi global di setiap waktu, kami mengusulkan pendekatan Client-Centric Consistency berupa Read-Your-Writes (RYW). Melalui mekanisme ini, setiap top-up di server Jakarta menghasilkan `version_number` yang disimpan oleh sesi klien sebagai `versi_minimal`. Saat klien yang sama membaca saldo di server Bandung, server Bandung cukup memastikan `versi_lokal >= versi_minimal` terlebih dahulu (dengan menunggu replikasi tiba atau mengambil dari Jakarta jika lewat batas waktu), sehingga pelanggan selalu melihat saldo terbarunya sendiri tanpa mengorbankan performa bagi pengguna lain.
+
+## Diskusi Skenario Tambahan (Di Luar FoodGo)
+- Skenario yang diangkat: Kasus pembatalan pesanan pada aplikasi ojek online (GoRide), di mana pelanggan membatalkan pesanan di Server Jakarta karena driver terlalu lama, lalu beberapa detik kemudian mengecek ulang status pesanan melalui koneksi yang diarahkan ke Server Bandung.
+- Model konsistensi yang dipilih: Read-Your-Writes yang dipadukan dengan Writes-Follow-Reads. Jika hanya memakai Eventual Consistency, Server Bandung bisa saja masih menampilkan status "Driver sedang menuju lokasi" sehingga membingungkan pelanggan dan membuat driver tetap jalan ke titik jemput. Dengan Read-Your-Writes, pelanggan yang baru melakukan pembatalan dijamin langsung membaca status "Cancelled", sedangkan Writes-Follow-Reads memastikan operasi pembatalan tersebut selalu tercatat setelah status pencarian driver yang sebelumnya dibaca oleh pelanggan.
+
+## Penyusunan & Revisi Sequence Diagram
+- Versi 1: Pada percobaan awal, diagram hanya menampilkan tiga komponen (`Pelanggan`, `Server Jakarta`, dan `Server Bandung`) dengan panah replikasi langsung dari Jakarta ke Bandung, sehingga urutan waktu terjadinya stale read saat delay 2 detik belum terlihat jelas.
+- Versi 2: Menambahkan komponen `Timer Replikasi` secara terpisah di Mermaid `sequenceDiagram`. Pada skenario naif, terlihat jelas bahwa `baca_saldo_naif` masuk ke Server Bandung pada `0.5` detik dan langsung mengembalikan `0.0` sebelum `Timer Replikasi` mengirimkan update `saldo=50000 versi=1` pada `t=2s`. Pada skenario Read-Your-Writes, ditambahkan catatan pemeriksaan `versi_lokal (1) < versi_minimal (2)` di mana Server Bandung melakukan polling menunggu update `saldo=70000 versi=2` dari `Timer Replikasi` sebelum mengembalikan saldo `70000` ke pelanggan.
 
 ## Simulasi (jika dikerjakan)
-- Hasil skenario naif vs Read-Your-Writes: ...
+- Hasil skenario naif vs Read-Your-Writes: Pada eksekusi `src/replica_simulation.py` dengan `REPLICATION_DELAY = 2.0` detik, skenario naif menguji `top_up("user1", 50000)` di Jakarta (versi 1) yang diikuti `baca_saldo_naif("user1", "Bandung")` setelah `time.sleep(0.5)`. Karena thread `threading.Timer` baru menulis ke Bandung setelah 2 detik, pembacaan naif di Bandung menghasilkan `0.0` (stale read), dan baru setelahnya muncul log `[Bandung] WRITE saldo user1 = 50000.0 (versi 1)`. Pada skenario Read-Your-Writes, dilakukan `top_up("user1", 20000)` sehingga saldo di Jakarta menjadi `70000.0` (versi 2), lalu langsung dipanggil `baca_saldo_read_your_writes("user1", "Bandung", versi_minimal=2)`. Karena di awal pemanggilan versi di Bandung masih `1`, fungsi menahan pembacaan di dalam loop `while replica.get_version(user_id) < versi_minimal` dengan `time.sleep(0.2)` sampai replikasi versi 2 tiba di Bandung, lalu mengembalikan hasil yang benar yaitu `70000.0`.
+- Pengujian & pendokumentasian bukti (Haniel): Saat menjalankan `py src/replica_simulation.py` dan memeriksa kesesuaian output terminal dengan penjelasan di `README.md`, ditemukan bahwa nilai akhir pada skenario kedua adalah `70000.0` karena top-up kedua (`20000`) ditambahkan ke saldo top-up pertama (`50000.0`) pada instance `ReplicationSystem` yang sama. Hasil eksekusi asli dari terminal disimpan ke dalam `bukti/output_simulasi.txt` dan rincian penelusuran jalannya kode ditambahkan ke Bagian 3 pada `README.md`.
 
 ## Log Penggunaan AI (Level 2)
 
@@ -13,4 +22,4 @@
 
 | Tanggal | Tool AI | Prompt yang diberikan | Ringkasan saran/ide AI | Bagaimana diolah jadi tulisan/kode sendiri |
 |---|---|---|---|---|
-| ... | ... | ... | ... | ... |
+| ... | NO AI | ... | ... | ... |
