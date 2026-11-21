@@ -12,113 +12,151 @@ Data saldo *e-wallet* pelanggan FoodGo berbeda antara server wilayah **Jakarta**
 
 ## Bagian 1 — Analisis Konsistensi Data (Nuevalen)
 
-> **Kontributor:** Nuevalen Refitra Alswanfo (103072430008)
+> **Kontributor:** Nuevalen Refitra Alswanado (103072430008)
 > **Fokus:** Analisis Teoritis, Pemilihan Model Konsistensi, & Skenario Tambahan
 
-### 1.1 Pemilihan Model Konsistensi: Sequential vs Eventual
+### 1.1 Analisis Model Konsistensi
 
-#### Kesimpulan
+#### Pengertian Sequential Consistency
+Sequential Consistency menjamin bahwa semua operasi dari semua klien terlihat dalam satu urutan global yang konsisten dengan urutan program setiap proses. Setiap klien melihat urutan operasi yang sama, dan urutan tersebut menghormati urutan program masing-masing klien.
 
-Kasus saldo *e-wallet* FoodGo **MEMBUTUHKAN Sequential Consistency** (atau minimal jaminan *Client-Centric* yang kuat seperti *Read-Your-Writes*), dan **TIDAK CUKUP** jika hanya mengandalkan *Eventual Consistency*.
+#### Pengertian Eventual Consistency
+Eventual Consistency menjamin bahwa, jika tidak ada write baru, semua replika pada akhirnya akan konvergen ke state yang sama. Namun, selama periode konvergen, replika yang berbeda dapat mengembalikan nilai yang berbeda untuk operasi read yang sama.
 
-#### Argumen Berbasis Dampak Bisnis
+#### Perbandingan Berdasarkan Kasus FoodGo
+Untuk saldo e-wallet FoodGo:
+- Eventual Consistency saja tidak cukup karena pengguna yang baru saja top-up mungkin langsung mencoba menggunakan saldo, dan jika di-route ke replika yang stale, transaksi bisa ditolak secara tidak benar.
+- Sequential Consistency akan menyelesaikan masalah ini tetapi dengan biaya tinggi terhadap throughput dan latensi, karena setiap write harus diurutkan secara global sebelum terlihat.
 
-Perbedaan fundamental antara kasus *e-wallet* dan kasus "jumlah like" di media sosial terletak pada **sifat transaksi** dan **dampak kerugian** yang ditimbulkan:
+#### Risiko Stale Read
+Tanpa jaminan konsistensi yang tepat, pengguna yang melakukan write (top-up) lalu langsung read (cek saldo) mungkin di-route ke replika yang belum menerima update, menghasilkan stale read. Ini menyebabkan pengalaman pengguna yang buruk dan potensi kegagalan transaksi.
 
-| Aspek | Saldo E-Wallet (FoodGo) | Jumlah Like (Media Sosial) |
+#### Risiko Double-Spending
+Pertimbangkan skenario di mana pengguna memiliki saldo Rp100.000. Jika dua transaksi bersamaan sebesar Rp80.000 masing-masing diinisiasi pada replika berbeda sebelum replikasi selesai, kedua replika mungkin melihat saldo awal Rp100.000 dan menyetujui transaksi, menghasilkan total debit Rp160.000, yang melebihi saldo sebenarnya. Ini adalah double-spending.
+
+**Pertanyaan analisis:** Apakah Read-Your-Writes (RYW) dapat mencegah kedua transaksi berhasil?
+**Jawaban:** Tidak secara otomatis. RYW hanya menjamin bahwa seorang klien melihat hasil write-nya sendiri. Jika dua transaksi bersamaan dilakukan oleh klien yang sama dari dua sesi berbeda, atau oleh dua klien berbeda pada replika yang berbeda, RYW tidak mencegah double-spending. Pencegahan double-spending memerlukan pengendalian transaksi bersamaan (concurrency control) pada sumber data otoritatif, seperti locking, serializable transactions, atau mekanisme konsensus.
+
+#### Pemilihan Model Konsistensi
+Untuk FoodGo, kita perlu memisahkan concern:
+1. **Konsistensi pembacaan saldo setelah top-up oleh pengguna yang sama:** Read-Your-Writes (RYW) cukup dan pragmatis.
+2. **Konsistensi transaksi debit dan kredit:** Memerlukan konsistensi transaksional yang kuat pada sumber otoritatif untuk memastikan invariant saldo (tidak ada saldo negatif, tidak ada double-spending).
+3. **Pencegahan transaksi bersamaan yang menyebabkan saldo negatif:** Memerlukan mekanisme pengendalian konkurensi (misal: locking optimis/pesimistis) pada sumber data otoritatif, bukan hanya konsistensi client-centric.
+
+Eventual Consistency masih dapat digunakan untuk view non-otoritatif seperti dashboard analitik, proyeksi historis, atau fitur tampilan-only di mana keterlambatan kecil dapat diterima.
+
+### 1.2 Usulan Client-Centric Consistency: Read-Your-Writes (RYW)
+
+#### Pengertian RYW
+Read-Your-Writes adalah model konsistensi client-centric yang menjamin seorang klien akan selalu melihat efek dari write-nya sendiri pada read berikutnya. Jika pengguna melakukan operasi write (misal: top-up), setiap read berikutnya oleh pengguna yang sama akan mengembalikan nilai yang mencerminkan setidaknya write tersebut.
+
+#### Mekanisme Version Number
+Setiap operasi write yang dilakukan oleh klien diberi `version_number` yang meningkat secara monotonik **per sesi pengguna** (bukan global). Versi ini dihasilkan oleh server otoritatif yang memproses write dan dikembalikan ke klien.
+
+#### Proses Pemeriksaan Versi Replika
+Ketika klien melakukan read, ia menyertakan `versi_minimal` (nomor versi dari write terakhirnya) dalam request. Replika yang melayani memeriksa versi lokalnya untuk pengguna tersebut:
+- Jika `versi_lokal >= versi_minimal`, replika dapat dengan aman mengembalikan data.
+- Jika `versi_lokal < versi_minimal`, replika harus menunggu hingga versi yang diperlukan direplikasi dari sumber otoritatif.
+
+#### Polling dan Timeout
+Replika melakukan polling pada penyimpanan lokalnya pada interval tetap (misal: 100-500ms) untuk memeriksa apakah versi yang diperlukan telah tiba. Timeout ditetapkan (misal: 3× delay replikasi maksimum yang diharapkan). Jika versi tidak tiba dalam timeout, polling berhenti.
+
+#### Fallback
+Jika timeout tercapai dan versi yang diperlukan masih tidak tersedia, replika **tidak boleh** mengembalikan data lama seolah-olah konsisten. Sebaliknya, ia harus:
+- Mengembalikan error yang menunjukkan bahwa data belum tersedia, atau
+- Meneruskan read ke sumber otoritatif (jika tersedia), atau
+- Jelas mengindikasikan kepada klien bahwa data yang dikembalikan mungkin stale.
+
+Mengembalikan data lama tanpa indikasi akan melanggar jaminan RYW dan menyesatkan pengguna.
+
+#### Keterbatasan RYW
+RYW memiliki batasan penting:
+1. **Hanya menjamin konsistensi per-klien:** RYW memastikan Pengguna A melihat write-nya sendiri. Ini **TIDAK** menjamin Pengguna B akan melihat write Pengguna A segera. Misalnya, jika Pengguna A top-up, Pengguna A akan melihat saldo baru, tetapi merchant yang memeriksa saldo Pengguna A mungkin masih melihat nilai lama hingga replikasi selesai.
+2. **Tidak mencegah double-spending:** Seperti dijelaskan di 1.1, RYW tidak menangani transaksi bersamaan dari klien atau sesi berbeda.
+3. **Bergantung pada penyimpanan versi klien:** `versi_minimal` biasanya disimpan di sesi klien (misal: cookie, JWT claim, atau localStorage). Jika penyimpanan ini dihapus atau hilang, klien mungkin mengalami stale read hingga melakukan write baru. **localStorage bukan mekanisme keamanan atau sumber kebenaran**; ia hanya kenyamanan untuk mempertahankan state sesi.
+
+#### Perbedaan RYW dengan Sequential Consistency
+| Aspek | Sequential Consistency | Read-Your-Writes |
 |---|---|---|
-| **Sifat data** | Finansial, presisi mutlak | Sosial, aproksimatif |
-| **Toleransi inkonsistensi** | **0% (zero tolerance)** | Tinggi (±1 like tidak masalah) |
-| **Dampak jika salah** | Kerugian finansial langsung, komplain pelanggan, sanksi regulasi (Bank Indonesia/OJK) | Tidak ada kerugian nyata |
-| **Regulasi** | Wajib taat UU PDP, aturan *e-money* BI | Tidak ada regulasi ketat |
+| **Cakupan** | Semua klien melihat urutan operasi global yang sama | Hanya menjamin klien melihat write-nya sendiri |
+| **Throughput** | Rendah (karena global ordering) | Tinggi (replika tetap async) |
+| **Latensi read** | Tinggi (harus sinkron global) | Rendah (kecuali saat menunggu replikasi) |
+| **Kesesuaian untuk e-wallet** | Ideal tetapi mahal | Pragmatis untuk pengalaman pengguna |
 
-#### Dampak Bisnis Nyata jika FoodGo Hanya Mengandalkan Eventual Consistency
+RYW adalah kompromi praktis yang meningkatkan pengalaman pengguna tanpa mengorbankan throughput sistem secara keseluruhan, tetapi harus dikombinasikan dengan konsistensi transaksional yang kuat pada sumber otoritatif untuk integritas keuangan.
 
-1. **Kerugian Finansial Langsung**
-   Pelanggan top-up Rp100.000 di Jakarta, lalu memesan makanan Rp50.000 via server Bandung. Karena replikasi *delay* 2 detik, saldo terbaca Rp0 → transaksi ditolak. Pelanggan kehilangan waktu, kepercayaan, dan berpotensi *churn*.
+### 1.3 Skenario Tambahan: GoRide (Ride-Hailing)
 
-2. **Risiko *Double-Spending***
-   Dalam skenario terburuk, pelanggan bisa memanfaatkan celah inkonsistensi untuk memesan di dua server berbeda sebelum saldo ter-update, menyebabkan *overdraft* sistemik.
+#### Skenario Pembatalan
+Seorang pelanggan membatalkan pesanan ojek di Server Jakarta karena driver tidak datang. Lima detik kemudian, pelanggan mengecek status pesanan via aplikasi yang di-route ke Server Bandung.
 
-3. **Kerugian Reputasi & Regulasi**
-   FoodGo sebagai platform yang memproses uang elektronik berada di bawah pengawasan Bank Indonesia (PBI No. 23/6/PBI/2021 tentang Sistem Pembayaran). Inkonsistensi saldo dapat dianggap sebagai **kegagalan sistem pembayaran** dan berujung pada denda atau pencabutan izin.
+#### Risiko Stale Read
+Jika Server Bandung belum menerima update pembatalan, ia mungkin masih menampilkan status "Searching driver" atau "Matched". Ini menyebabkan:
+- Kebingungan dan kecemasan pelanggan ("Saya sudah cancel, kenapa driver masih datang?")
+- Driver terus perjalanan ke lokasi, membuang waktu dan bahan bakar
+- Potensi konflik antara pelanggan dan driver
+- Sistem mungkin masih menagih biaya pembatalan karena status belum update
 
-4. **Biaya *Customer Support* Membengkak**
-   Setiap transaksi gagal karena *stale read* akan memicu tiket komplain. Dalam skala jutaan pengguna, ini adalah beban operasional masif.
+#### Penerapan RYW
+Dengan RYW, pelanggan yang melakukan pembatalan (write) akan selalu melihat status "Cancelled" pada read berikutnya. Ini menyelesaikan masalah pengalaman pengguna segera untuk pelanggan yang beraksi.
 
-#### Kontras dengan Kasus "Jumlah Like"
+#### Penerapan Writes-Follow-Reads (WFR)
+Writes-Follow-Reads menjamin bahwa jika klien membaca suatu nilai lalu melakukan write, write tersebut diurutkan secara kausal setelah read. Misalnya, jika pelanggan membaca "Searching driver" lalu membatalkan, pembatalan dijamin terlihat setelah state "Searching" dalam urutan kausal untuk klien tersebut.
 
-Jika jumlah like di media sosial terbaca 1000 di server A dan 999 di server B selama beberapa detik, tidak ada pelanggan yang dirugikan secara finansial. *Eventual Consistency* di sini adalah pilihan optimal karena mengutamakan *availability* dan *low latency* di atas konsistensi ketat.
+**Namun, WFR TIDAK menjamin bahwa semua replika langsung menampilkan status pembatalan.** WFR hanya memastikan urutan kausal untuk operasi klien tersebut. Klien lain (misal: aplikasi driver) mungkin masih melihat data stale hingga replikasi selesai.
 
-> **Kesimpulan akhir:** Untuk data finansial seperti saldo *e-wallet*, **Sequential Consistency** (semua replika melihat urutan operasi yang sama) adalah keharusan — atau minimal jaminan *Client-Centric* yang kuat. *Eventual Consistency* hanya boleh dipakai untuk data non-kritis seperti riwayat pencarian, rekomendasi, atau jumlah like.
+#### Validasi Perubahan Status
+Terlepas dari model konsistensi, sistem harus memvalidasi transisi status yang valid. Misalnya:
+- Pesanan dengan status "Completed" tidak boleh berubah menjadi "Cancelled".
+- Pesanan dengan status "Cancelled" tidak boleh berubah menjadi "OnTrip".
+State machine harus divalidasi pada sumber otoritatif untuk mencegah transisi ilegal, bahkan jika replika sementara tidak konsisten.
 
----
+#### Hubungan Status Pesanan dengan Notifikasi Pengemudi
+Ketika pesanan dibatalkan, driver harus segera diberitahu. Jika ada keterlambatan replikasi, aplikasi driver mungkin tidak menerima notifikasi pembatalan tepat waktu, menyebabkan perjalanan yang tidak perlu. Ini memerlukan:
+- Sistem push notification yang andal yang independen dari lag replikasi data.
+- Aplikasi driver juga harus mengimplementasikan RYW atau WFR jika driver melakukan aksi berdasarkan status pesanan.
+- Perubahan status kritis (seperti pembatalan) harus memicu notifikasi out-of-band segera kepada pihak yang terpengaruh.
 
-### 1.2 Usulan Solusi: Client-Centric Consistency — *Read-Your-Writes* (RYW)
-
-Meskipun *Sequential Consistency* ideal, penerapannya secara global di seluruh replika FoodGo akan **menurunkan throughput** dan **meningkatkan latency** secara signifikan (karena semua *write* harus diurutkan secara global). Oleh karena itu, solusi pragmatis yang diusulkan adalah **Read-Your-Writes (RYW)** — sebuah model *Client-Centric Consistency*.
-
-#### Prinsip Dasar
-
-> *"Seorang klien yang baru saja melakukan write (top-up), SELALU akan membaca hasil write-nya sendiri pada read berikutnya, meskipun replika lain belum sinkron."*
-
-#### Mekanisme Implementasi
-
-1. **Setiap *write* menghasilkan `version_number` monotonik** (misal: `v=1, v=2, v=3...`) yang dicatat di server asal (Jakarta).
-2. **Server mengembalikan `version_number` tersebut ke klien** bersama respons `OK`.
-3. **Klien menyimpan `versi_minimal = version_number`** di *session*-nya (bisa di cookie, JWT claim, atau *local storage*).
-4. **Pada setiap *read* berikutnya**, klien menyertakan `versi_minimal` dalam request.
-5. **Server tujuan (misal: Bandung) mengecek versi lokalnya:**
-   - Jika `versi_lokal >= versi_minimal` → langsung kembalikan data.
-   - Jika `versi_lokal < versi_minimal` → **tunda respons** (*polling*) sampai data replikasi dari Jakarta tiba, ATAU **forward read ke Jakarta** (*read routing*).
-6. **Timeout protection:** Jika replikasi tidak tiba dalam batas waktu (misal 3× `REPLICATION_DELAY`), *fallback* ke server asal agar klien tidak menunggu selamanya.
-
-#### Perbandingan RYW vs Sequential Consistency Penuh
-
-| Aspek | Sequential Consistency Penuh | Read-Your-Writes |
-|---|---|---|
-| **Konsistensi global** | ✅ Semua klien melihat urutan sama | ⚠️ Hanya menjamin konsistensi *per-klien* |
-| **Throughput** | ❌ Rendah (*global ordering*) | ✅ Tinggi (replika tetap *async*) |
-| **Latency read** | ❌ Tinggi (harus sinkron) | ✅ Rendah (kecuali saat RYW *trigger*) |
-| **Cocok untuk e-wallet** | ✅ Ya, tapi *overkill* | ✅ Ya, **tepat sasaran** |
-
-**RYW adalah "sweet spot"** untuk kasus FoodGo: pelanggan yang baru top-up dijamin melihat saldo terbarunya, sementara pelanggan lain yang tidak berinteraksi dengan transaksi tersebut tetap mendapat performa tinggi dari replika terdekat.
-
----
-
-### 1.3 Skenario Tambahan (Di Luar FoodGo)
-
-Untuk membuktikan bahwa pemahaman meluas di luar studi kasus FoodGo, berikut analisis singkat untuk skenario berbeda:
-
-#### Skenario: Aplikasi Ride-Hailing (Ojek Online) — "GoRide"
-
-**Kasus:** Seorang pelanggan membatalkan pesanan ojek di **Server Jakarta** (karena *driver* tidak datang), lalu dalam 5 detik mengecek status pesanan via aplikasi yang di-*route* ke **Server Bandung**.
-
-**Pertanyaan:** Model konsistensi apa yang dibutuhkan?
-
-#### Analisis
-
-- **Bukan Eventual Consistency**
-  Jika server Bandung masih menampilkan status "Driver sedang menuju lokasi" padahal pelanggan sudah membatalkan, maka:
-  - Pelanggan bingung dan cemas ("Loh, kok driver masih datang? Saya sudah cancel!")
-  - *Driver* tetap datang ke lokasi → biaya operasional *driver* terbuang
-  - Potensi konflik fisik di lapangan antara pelanggan dan *driver*
-  - Sistem mungkin tetap menagih biaya pembatalan karena status belum sinkron
-
-- **Model yang tepat: Read-Your-Writes + Writes-Follow-Reads**
-  - **RYW** menjamin pelanggan yang baru *cancel* (*write*) akan selalu membaca status "Cancelled" pada *read* berikutnya.
-  - **Writes-Follow-Reads (WFR)** menjamin bahwa jika pelanggan membaca status "Searching driver" lalu melakukan *cancel*, maka *cancel* tersebut akan terlihat *setelah* status "Searching" di semua replika — mencegah anomali urutan operasi.
-
-#### Perbedaan dengan FoodGo
-
+#### Perbandingan dengan FoodGo
 | Aspek | FoodGo (E-Wallet) | GoRide (Ride-Hailing) |
 |---|---|---|
-| **Data kritis** | Saldo (angka presisi) | Status pesanan (*state machine*) |
-| **Contoh status** | `saldo = Rp100.000` | `Searching → Matched → OnTrip → Cancelled` |
-| **Toleransi inkonsistensi** | 0% | 0% |
-| **Mekanisme RYW** | Berbasis `version_number` | Berbasis `state_transition_timestamp` |
+| **Data kritis** | Saldo (invariant keuangan) | Status pesanan (state machine) |
+| **Risiko utama** | Double-spending, saldo negatif | Pembatalan tidak terkirim, konflik fisik |
+| **Kebutuhan RYW** | Agar pengguna melihat saldo setelah top-up | Agar pengguna melihat status setelah cancel |
+| **Kebutuhan konsistensi transaksional** | Wajib di sumber otoritatif untuk integritas saldo | Wajib di sumber otoritatif untuk validasi transisi status |
+| **Notifikasi pihak ketiga** | Tidak selalu diperlukan | Wajib untuk pengemudi |
 
-**Insight:** Pola yang sama (RYW) dapat diterapkan lintas domain selama ada operasi *write-then-read* dari klien yang sama dalam selang waktu singkat. Ini adalah ciri khas aplikasi interaktif modern.
+Kedua skenario mendapat manfaat dari RYW untuk pengalaman pengguna, tetapi FoodGo tambahan memerlukan konsistensi transaksional yang kuat untuk menegakkan invariant keuangan, sementara GoRide memerlukan validasi transisi status yang andal dan notifikasi out-of-band.
+
+### 1.4 Evaluasi dan Trade-off
+
+#### Kelebihan Solusi RYW
+- Meningkatkan pengalaman pengguna: klien selalu melihat hasil aksinya sendiri.
+- Tidak mengorbankan throughput global: replika tetap dapat melayani read secara async.
+- Implementasi relatif sederhana dibandingkan konsistensi global ketat.
+
+#### Kekurangan Solusi RYW
+- Tidak menjamin konsistensi antar-klien: pengguna lain mungkin masih melihat data lama.
+- Tidak mencegah double-spending atau pelanggaran invariant keuangan.
+- Bergantung pada penyimpanan versi di sisi klien, yang bisa hilang atau dimanipulasi.
+
+#### Risiko Implementasi
+- Jika `versi_minimal` hilang (misal, localStorage dihapus), klien mungkin mengalami stale read.
+- Timeout yang terlalu singkat dapat menyebabkan fallback ke data lama tanpa indikasi, melanggar jaminan RYW.
+- Polling yang terlalu sering dapat membebani server.
+- Fallback ke server otoritatif harus hati-hati agar tidak menciptakan single point of failure.
+
+#### Kapan RYW Cocok Digunakan
+- Ketika prioritas utama adalah memastikan pengguna melihat hasil aksinya sendiri (misal: posting media sosial, update profil, cek saldo setelah top-up).
+- Ketika inkonsistensi antar-klien dapat ditoleransi untuk jangka waktu pendek.
+- Ketika throughput dan latensi lebih penting daripada konsistensi global ketat.
+
+#### Kapan Dibutuhkan Konsistensi Transaksional yang Lebih Kuat
+- Ketika invariant keuangan harus dijaga (misal: saldo tidak boleh negatif, tidak ada double-spending).
+- Ketika beberapa pengguna harus melihat view yang konsisten secara bersamaan (misal: sistem lelang, edit dokumen bersama dengan urutan ketat).
+- Ketika transaksi melibatkan beberapa entitas yang harus di-commit atau rollback secara atomik.
+
+Untuk FoodGo, sumber saldo otoritatif harus menegakkan konsistensi transaksional yang kuat dan pengendalian konkurensi. RYW dilapiskan di atasnya untuk meningkatkan pengalaman pengguna bagi klien yang beraksi, tetapi tidak menggantikan kebutuhan integritas transaksional di inti.
 
 ---
 
