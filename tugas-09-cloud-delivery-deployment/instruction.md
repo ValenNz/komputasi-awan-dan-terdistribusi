@@ -1,230 +1,69 @@
-# 📋 Pembagian Tugas 9 — Cloud Delivery & Deployment Model
-## Studi Kasus: Sistem Data Kependudukan Nasional
+# INSTRUCTION.md — Tugas 09: Cloud Delivery & Deployment Model
 
-**Kelompok:** [Isi Nama Kelompok]
-**Sifat Tugas:** Murni analisis & desain di atas kertas (TIDAK ada implementasi cloud / biaya apa pun)
-**Target Selesai:** H-2 sebelum deadline
+**Tujuan:** Menganalisis rancangan Sistem Data Kependudukan dan menentukan deployment model serta service model yang sesuai. Tugas ini analisis/desain, bukan deployment cloud sungguhan.
 
----
+## Pembagian tanggung jawab utama
 
-## 👥 Anggota & Porsi Kerja (Semua Dapat Bagian Analisis)
+| Anggota | Fokus utama / deliverable |
+|---|---|
+| Nuevalen Refitra Alswanado | Analisis karakteristik esensial NIST dan kebutuhan kerahasiaan, skalabilitas, serta akses lintas instansi. |
+| Farrellino Ulung Satya Amando | Evaluasi deployment model Public, Private, Hybrid, dan Community Cloud; susun alasan pemilihan dan penolakan alternatif. |
+| Haniel Juanta Sembiring | Pemetaan komponen sistem ke IaaS, PaaS, dan SaaS; jelaskan batas tanggung jawab tiap model. |
+| Rohmatul Choirul Anam | Identifikasi minimal dua risiko spesifik beserta mitigasi; integrasikan argumen dan buat diagram arsitektur konseptual. |
 
-| Nama | NIM | Fokus Analisis | Bobot Rubrik yang Diampu |
-|---|---|---|---|
-| **Nuevalen Refitra Alswanfo** | 103072430008 | Deployment Model + Pemetaan 5 Karakteristik NIST | **30%** + 10% |
-| **Farrellino Ulung Satya Amando** | 103072400005 | Service Model per Komponen + Diagram Arsitektur | **25%** + 10% |
-| **Haniel Juanta Sembiring** | 103072400145 | Analisis Risiko & Mitigasi + Compliance UU PDP | **25%** |
+## Praktik bersama — wajib dilakukan semua anggota
 
-> **Prinsip:** Tidak ada anggota yang tugasnya hanya "merapikan README". Integrasi dokumen adalah tugas **bersama**, dan setiap orang menulis sendiri bagian analisisnya langsung ke `README.md`.
+1. Setiap anggota membaca studi kasus dan membuat keputusan awal deployment/service model secara mandiri.
+2. Diskusikan perbedaan keputusan. Jangan langsung menerima rekomendasi PIC tanpa argumen.
+3. Buat diagram rancangan bersama yang menunjukkan data inti, portal akses, instansi pengguna, batas private/public segment jika dipilih, serta aliran data.
+4. Setiap anggota wajib mempresentasikan satu risiko dan mitigasinya, serta menjelaskan satu karakteristik NIST.
+5. Lakukan peer review: tiap anggota memeriksa satu bagian analisis anggota lain dan memberi masukan berbasis kebutuhan kasus.
 
----
+## Langkah pengerjaan
 
-## 🔵 NUEVALEN — Deployment Model & Karakteristik NIST
+1. Uraikan kebutuhan: data sangat rahasia, ribuan instansi, beban tidak merata, skalabilitas, dan kendali infrastruktur.
+2. Nilai pilihan deployment berdasarkan karakteristik NIST: on-demand self-service, broad network access, resource pooling, rapid elasticity, dan measured service.
+3. Tentukan deployment model yang paling masuk akal dan jelaskan trade-off-nya. Hindari alasan generik seperti “private lebih aman” tanpa penjelasan.
+4. Petakan komponen berbeda ke service model IaaS/PaaS/SaaS sesuai kebutuhan kontrol dan operasional.
+5. Analisis minimal dua risiko spesifik dan mitigasinya.
+6. Bandingkan dengan satu alternatif yang ditolak.
+7. Satukan hasil menjadi `README.md`, tambahkan diagram bila membantu, dan isi `JURNAL.md`.
 
-### Deliverable Wajib (tulis langsung di `README.md` §1 dan §4a)
+## Berkas submission
 
-**1. Rekomendasi Deployment Model (bobot 30%)**
-- Pilih SATU: Public / Private / Hybrid / Community Cloud.
-- Argumen **wajib berbasis kebutuhan kasus**, bukan hafalan definisi:
-  - Kerahasiaan NIK + biometrik ( UU PDP No. 27/2022 )
-  - Kedaulatan data (*data sovereignty*) — negara haruskendali penuh infrastruktur
-  - Pola akses tidak rata (lonjakan pemilu / pendaftaran sekolah)
-- Jelaskan **segmen mana yang masuk private, segmen mana yang boleh keluar**, kalau memilih Hybrid.
+- `README.md` — jawaban empat poin sesuai README tugas.
+- `JURNAL.md` — proses, keputusan, kendala, dan log AI.
+- `bukti/` — diagram pendukung bila digunakan.
 
-**2. Tabel Pemetaan 5 Karakteristik Esensial NIST SP 800-145**
+## Kriteria selesai
 
-Wajib isi kolom "Bagaimana model pilihan kami memenuhinya" untuk kelima baris:
+Semua empat pertanyaan pada README tugas terjawab, argumen terikat pada studi kasus, setiap anggota dapat mempertahankan keputusan kelompok, dan semua anggota memiliki commit sendiri.
 
-| Karakteristik NIST | Terpenuhi? | Penjelasan Konkret di Sistem Kependudukan |
-|---|---|---|
-| On-demand self-service | ... | mis. Dukcapil daerah provisioning akun via portal mandiri |
-| Broad network access | ... | ... |
-| Resource pooling | ... | ... |
-| Rapid elasticity | ... | ... |
-| Measured service | ... | ... |
+## Aturan kerja wajib untuk seluruh anggota
 
-**3. Alternatif yang Ditolak #1 — Public Cloud Murni (bobot 10%)**
-- Minimal 3 alasan penolakan yang spesifik ke data kependudukan (bukan "tidak aman" saja).
-- Kaitkan dengan konsekuensi hukum & kedaulatan data.
+1. Baca README tugas terkait, `HANDBOOK.md`, dan `RUBRIK-UMUM.md` sebelum mulai.
+2. PIC adalah penanggung jawab koordinasi dan pemeriksaan, bukan satu-satunya orang yang mengerjakan.
+3. Setiap anggota wajib melakukan praktik langsung pada laptop masing-masing jika memungkinkan. Jika keterbatasan perangkat mengharuskan praktik bergantian, setiap orang tetap harus menjalankan ulang langkah inti dan menjelaskan hasilnya.
+4. Setiap anggota wajib menghasilkan kontribusi nyata yang dapat ditelusuri melalui commit GitHub atas nama sendiri. Jangan melakukan commit atas nama anggota lain.
+5. Setiap anggota wajib memahami hasil kerja tiga anggota lainnya. Lakukan sesi saling menjelaskan dan tanya jawab sebelum tugas dinyatakan selesai.
+6. Catat progres, kendala, percobaan yang gagal, solusi, dan pembagian kontribusi pada `JURNAL.md`.
+7. Simpan bukti asli berupa screenshot terminal/browser, log, diagram, atau video pada folder `bukti/` sesuai instruksi tugas.
+8. Ikuti kebijakan AI Level 2 pada repositori: AI hanya untuk brainstorming dan penyusunan kerangka. Jangan meminta AI menghasilkan kode, analisis akhir, diagram final, atau README siap salin. Catat penggunaan AI pada `JURNAL.md`.
+9. Jangan mengubah skeleton atau file yang diminta tetap menjadi bukti kondisi awal kecuali README tugas secara eksplisit mengizinkan.
+10. Setelah semua anggota menyetujui hasil, lakukan commit dan push bertahap. Buat tag `tugas-XX-submit` sesuai Handbook, lalu kumpulkan permalink folder pada tag tersebut ke LMS.
 
-### Definition of Done
-- [ ] Rekomendasi deployment model + minimal 4 paragraf argumen
-- [ ] Tabel 5 karakteristik NIST terisi semua (tidak ada "...")
-- [ ] Penolakan Public Cloud murni dengan ≥3 alasan konkret
-- [ ] Commit atas nama sendiri
+## Identitas anggota
 
----
+| Nama | NIM |
+|---|---|
+| Nuevalen Refitra Alswanado | 103072430008 |
+| Farrellino Ulung Satya Amando | 103072400005 |
+| Haniel Juanta Sembiring | 103072400145 |
+| Rohmatul Choirul Anam | 103072400024 |
 
-## 🟢 FARRELLINO — Service Model per Komponen & Diagram
+## Bukti kontribusi minimum per anggota
 
-### Deliverable Wajib (tulis langsung di `README.md` §2 dan §4b)
-
-**1. Dekomposisi Sistem Jadi Komponen (bobot 25%)**
-
-Minimal **5 komponen**, contoh yang wajib dipertimbangkan:
-- Database inti kependudukan (NIK, alamat, biometrik)
-- API verifikasi KYC untuk bank/kepolisian
-- Portal publik cek status permohonan (tanpa data sensitif)
-- Sistem antrian / notifikasi
-- Dashboard analytics untuk pembuat kebijakan
-- Backup & disaster recovery
-
-**2. Tabel Pemetaan Komponen → Service Model + Alasan**
-
-| Komponen | Service Model (IaaS/PaaS/SaaS) | Segmen (Private/Public) | Alasan Teknis & Keamanan |
-|---|---|---|---|
-| Database inti + biometrik | ... | ... | ... |
-| API KYC | ... | ... | ... |
-| Portal cek status | ... | ... | ... |
-| Notifikasi / email | ... | ... | ... |
-| Dashboard analytics | ... | ... | ... |
-
-> Aturan: **tidak boleh semua komponen diberi label yang sama**. Harus ada diferensiasi dan alasan kenapa berbeda.
-
-**3. Diagram Arsitektur (Mermaid) → simpan juga di `bukti/`**
-- Tunjukkan batas tegas **private segment ↔ public segment**.
-- Tandai komponen mana yang boleh menyentuh data sensitif, mana yang hanya data ter-*anonimize*.
-- Gunakan `flowchart` atau `graph TD` dengan `subgraph`.
-
-**4. Alternatif yang Ditolak #2 — Private Cloud Murni / IaaS-only (bobot 10%)**
-- Kenapa kurang tepat dari sisi skalabilitas saat lonjakan pemilu?
-- Kenapa beban operasional (SDM, patching, capacity planning) jadi masalah?
-
-### Definition of Done
-- [ ] Tabel ≥5 komponen dengan service model berbeda-beda + alasan
-- [ ] Diagram Mermaid valid (dirender, tidak error)
-- [ ] Penolakan Private murni/IaaS-only dengan argumen elastisitas
-- [ ] Commit atas nama sendiri
-
----
-
-## 🟠 HANIEL — Analisis Risiko, Mitigasi & Kepatuhan Regulasi
-
-### Deliverable Wajib (tulis langsung di `README.md` §3)
-
-**1. Minimal 3 Risiko Spesifik + Mitigasi (bobot 25%)**
-
-⚠️ **Risiko generik seperti "server bisa down" atau "data bisa dicuri" TIDAK diterima.** Harus spesifik ke konteks data kependudukan + model yang dipilih. Contoh arah yang benar:
-
-| No | Risiko Spesifik | Dampak ke Warga Negara | Mitigasi Konkret |
-|---|---|---|---|
-| R1 | Kebocoran NIK/biometrik lewat segmen public yang salah konfigurasi | ... | ... |
-| R2 | Gagal sinkronisasi data private ↔ public saat lonjakan pemilu | ... | ... |
-| R3 | *Vendor lock-in* / yurisdiksi hukum penyedia cloud asing | ... | ... |
-| R4 | *Insider threat* operator Dukcapil daerah | ... | ... |
-
-**2. Matriks Risiko (Likelihood × Impact)**
-- Beri skor 1–5 untuk tiap risiko, hitung prioritas.
-- Tentukan risiko mana yang harus ditangani lebih dulu.
-
-**3. Checklist Kepatuhan Regulasi**
-- UU PDP No. 27/2022 (pasal tentang data spesifik/biometrik & pemrosesan)
-- Kewajiban *data localization* untuk data strategis pemerintah
-- Audit trail & hak subjek data (akses, koreksi, penghapusan)
-
-**4. Verifikasi Silang (quality gate)**
-- Cek apakah risiko yang ditulis benar-benar **nyambung** dengan deployment model Nuevalen dan komponen Farrellino.
-- Kalau ada yang tidak sinkron, angkat di grup sebelum push.
-
-### Definition of Done
-- [ ] ≥3 risiko spesifik konteks kependudukan + mitigasi konkret
-- [ ] Matriks likelihood × impact terisi
-- [ ] Checklist kepatuhan UU PDP
-- [ ] Commit atas nama sendiri
-
----
-
-## 🤝 TUGAS BERSAMA (bukan dilempar ke satu orang)
-
-| Aktivitas | Peserta | Durasi |
-|---|---|---|
-| Kick-off: sepakati hipotesis awal deployment model | Semua | 30 menit |
-| Kerja individu sesuai porsi | Masing-masing | 1–2 hari |
-| Sesi review silang (baca bagian teman, kasih koreksi) | Semua | 45 menit |
-| Finalisasi `README.md` + isi `JURNAL.md` bagian masing-masing | Semua | 30 menit |
-| Commit & push dari laptop sendiri | Semua | 10 menit |
-
-### Aturan Review Silang
-- Nuevalen → review tabel service model Farrellino (apakah segmen private/public konsisten?)
-- Farrellino → review risiko Haniel (apakah komponennya ada di diagram?)
-- Haniel → review argumen NIST Nuevalen (apakah 5 karakteristik benar-benar terjawab, bukan tempelan?)
-
----
-
-## 🧭 Hipotesis Awal untuk Didiskusikan (belum final!)
-
-> Ini **titik berangkat diskusi**, bukan jawaban jadi. Setiap anggota wajib menguji/membantah hipotesis ini di bagiannya masing-masing.
-
-- **Deployment:** Hybrid — private untuk database inti & biometrik, public untuk portal cek status/antrian yang tidak memuat data sensitif.
-- **Service:** IaaS/PaaS di private untuk core, PaaS/SaaS di public untuk komponen non-sensitif.
-- **Risiko utama:** kebocoran di batas segmen + gagal sinkronisasi saat lonjakan.
-
-Kalau ada anggota yang punya argumen lebih kuat untuk **Community Cloud** (cloud khusus antar-instansi pemerintah) atau **Private + CDN**, silakan bawa ke sesi kick-off — keputusan final dicatat di `JURNAL.md`.
-
----
-
-## 📁 Struktur Submission
-
-```
-tugas-09-cloud-delivery-deployment/
-├── README.md              # §1 Nuevalen | §2 Farrellino | §3 Haniel | §4a Nuevalen | §4b Farrellino
-├── JURNAL.md              # diisi masing-masing anggota
-├── PEMBAGIAN_TUGAS.md     # dokumen ini
-└── bukti/
-    ├── arsitektur.mmd     # Farrellino
-    └── matriks-risiko.md  # Haniel (opsional)
-```
-
-### Kerangka `README.md` (biar tidak tabrakan saat merge)
-
-```
-# Tugas 9 — Cloud Delivery & Deployment Model
-## Studi Kasus                        [bersama]
-## 1. Rekomendasi Deployment Model    [NUEVALEN]
-## 2. Rekomendasi Service Model       [FARRELLINO]
-## 3. Risiko & Mitigasi               [HANIEL]
-## 4. Perbandingan Alternatif Ditolak
-### 4a. Public Cloud Murni            [NUEVALEN]
-### 4b. Private Murni / IaaS-only     [FARRELLINO]
-## Ringkasan Kontribusi               [bersama]
-```
-
-> 💡 Karena satu file diedit 3 orang, **kerjakan berurutan atau pakai branch terpisah** lalu merge. Jangan edit section orang lain.
-
----
-
-## 🚀 Git Commit (wajib dari laptop masing-masing)
-
-```bash
-# NUEVALEN
-git pull origin main
-git add tugas-09-cloud-delivery-deployment/README.md
-git commit -m "Tugas 9: Nuevalen - Rekomendasi deployment model, pemetaan 5 karakteristik NIST, & penolakan public cloud murni"
-git push origin main
-
-# FARRELLINO
-git pull origin main
-git add tugas-09-cloud-delivery-deployment/README.md tugas-09-cloud-delivery-deployment/bukti/
-git commit -m "Tugas 9: Farrellino - Pemetaan service model per komponen, diagram arsitektur, & penolakan private murni"
-git push origin main
-
-# HANIEL
-git pull origin main
-git add tugas-09-cloud-delivery-deployment/README.md tugas-09-cloud-delivery-deployment/JURNAL.md
-git commit -m "Tugas 9: Haniel - Analisis risiko spesifik kependudukan, matriks risiko, mitigasi, & checklist UU PDP"
-git push origin main
-```
-
----
-
-## 📊 Peta Rubrik → Penanggung Jawab
-
-| Komponen Rubrik | Bobot | Penanggung Jawab |
-|---|---|---|
-| Ketepatan rekomendasi deployment model | 30% | **Nuevalen** |
-| Ketepatan rekomendasi service model | 25% | **Farrellino** |
-| Analisis risiko & mitigasi | 25% | **Haniel** |
-| Perbandingan alternatif ditolak | 20% | **Nuevalen (10%) + Farrellino (10%)** |
-| Proses & kontribusi (JURNAL + commit) | — | **Semua** |
-
-**Total:** setiap anggota memegang porsi analisis yang dinilai, tidak ada yang hanya jadi "editor".
+- Minimal satu commit bermakna atas nama sendiri pada tugas ini.
+- Ada hasil praktik/analisis yang jelas dan dapat ditunjukkan.
+- Mampu menjelaskan bagian sendiri dan menjawab pertanyaan tentang bagian anggota lain.
+- Nama, NIM, dan kontribusi dicantumkan secara jujur pada tabel kontribusi di README submission.
