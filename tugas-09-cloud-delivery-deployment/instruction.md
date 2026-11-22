@@ -7,7 +7,7 @@
 | Anggota | Fokus utama / deliverable |
 |---|---|
 | Nuevalen Refitra Alswanado | Analisis karakteristik esensial NIST dan kebutuhan kerahasiaan, skalabilitas, serta akses lintas instansi. |
-| Farrellino Ulung Satya Amando | Evaluasi deployment model Public, Private, Hybrid, dan Community Cloud; susun alasan pemilihan dan penolakan alternatif. |
+| Galang Herjuo Mulya | Evaluasi deployment model Public, Private, Hybrid, dan Community Cloud; susun alasan pemilihan dan penolakan alternatif. |
 | Haniel Juanta Sembiring | Pemetaan komponen sistem ke IaaS, PaaS, dan SaaS; jelaskan batas tanggung jawab tiap model. |
 | Rohmatul Choirul Anam | Identifikasi minimal dua risiko spesifik beserta mitigasi; integrasikan argumen dan buat diagram arsitektur konseptual. |
 
@@ -57,7 +57,7 @@ Semua empat pertanyaan pada README tugas terjawab, argumen terikat pada studi ka
 | Nama | NIM |
 |---|---|
 | Nuevalen Refitra Alswanado | 103072430008 |
-| Farrellino Ulung Satya Amando | 103072400005 |
+| Galang Herjuo Mulya | 103072430006 |
 | Haniel Juanta Sembiring | 103072400145 |
 | Rohmatul Choirul Anam | 103072400024 |
 

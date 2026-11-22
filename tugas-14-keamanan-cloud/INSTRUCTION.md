@@ -7,7 +7,7 @@
 | Anggota | Fokus utama / deliverable |
 |---|---|
 | Nuevalen Refitra Alswanado | Koordinasi pemindaian Gitleaks, verifikasi command dan cakupan riwayat commit, serta analisis hasil scan. |
-| Farrellino Ulung Satya Amando | Menyiapkan GitHub Secret dummy dan menguji penggunaan secret sebagai environment variable pada workflow. |
+| Galang Herjuo Mulya | Menyiapkan GitHub Secret dummy dan menguji penggunaan secret sebagai environment variable pada workflow. |
 | Haniel Juanta Sembiring | Melengkapi dan menguji workflow GitHub Actions pada `.github/workflows/` di root repository; memastikan nilai secret tidak dicetak. |
 | Rohmatul Choirul Anam | Analisis Shared Responsibility, `.gitignore`, `.env.example`, IAM Least Privilege, dan dokumentasi bukti. |
 
@@ -65,7 +65,7 @@ Seluruh riwayat repository dipindai, secret dummy dipakai melalui workflow, nila
 | Nama | NIM |
 |---|---|
 | Nuevalen Refitra Alswanado | 103072430008 |
-| Farrellino Ulung Satya Amando | 103072400005 |
+| Galang Herjuo Mulya | 103072430006 |
 | Haniel Juanta Sembiring | 103072400145 |
 | Rohmatul Choirul Anam | 103072400024 |
 

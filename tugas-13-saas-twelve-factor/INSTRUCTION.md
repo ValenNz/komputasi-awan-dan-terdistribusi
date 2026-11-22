@@ -7,7 +7,7 @@
 | Anggota | Fokus utama / deliverable |
 |---|---|
 | Nuevalen Refitra Alswanado | Audit Factor I — Codebase dan keterlacakan satu codebase untuk banyak deployment. |
-| Farrellino Ulung Satya Amando | Audit Factor II — Dependencies, inventarisasi dependency, dan strategi penguncian versi. |
+| Galang Herjuo Mulya | Audit Factor II — Dependencies, inventarisasi dependency, dan strategi penguncian versi. |
 | Haniel Juanta Sembiring | Audit Factor III — Config, identifikasi nilai hardcoded, environment variable, dan konfigurasi runtime. |
 | Rohmatul Choirul Anam | Integrasi perbaikan pada `fixed_app.py`, pengujian sebelum/sesudah, dan konsistensi laporan audit. |
 
@@ -64,7 +64,7 @@ Tiga faktor diaudit dengan bukti spesifik, `bad_app.py` tetap utuh, `fixed_app.p
 | Nama | NIM |
 |---|---|
 | Nuevalen Refitra Alswanado | 103072430008 |
-| Farrellino Ulung Satya Amando | 103072400005 |
+| Galang Herjuo Mulya | 103072430006 |
 | Haniel Juanta Sembiring | 103072400145 |
 | Rohmatul Choirul Anam | 103072400024 |
 

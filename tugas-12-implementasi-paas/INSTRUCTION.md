@@ -7,7 +7,7 @@
 | Anggota | Fokus utama / deliverable |
 |---|---|
 | Nuevalen Refitra Alswanado | Audit skeleton Flask, identifikasi konfigurasi aplikasi, dan koordinasi persiapan repository untuk deployment. |
-| Farrellino Ulung Satya Amando | Pengujian lokal: virtual environment, dependency, menjalankan aplikasi, endpoint utama dan `/health`. |
+| Galang Herjuo Mulya | Pengujian lokal: virtual environment, dependency, menjalankan aplikasi, endpoint utama dan `/health`. |
 | Haniel Juanta Sembiring | Persiapan konfigurasi deployment berbasis dokumentasi resmi PaaS, build/start command, dan pemeriksaan log deployment. |
 | Rohmatul Choirul Anam | Verifikasi akses URL publik, screenshot, tabel shared responsibility, dan analisis keterbatasan PaaS. |
 
@@ -63,7 +63,7 @@ Aplikasi berjalan lokal dan dapat diakses melalui URL publik, endpoint health di
 | Nama | NIM |
 |---|---|
 | Nuevalen Refitra Alswanado | 103072430008 |
-| Farrellino Ulung Satya Amando | 103072400005 |
+| Galang Herjuo Mulya | 103072430006 |
 | Haniel Juanta Sembiring | 103072400145 |
 | Rohmatul Choirul Anam | 103072400024 |
 

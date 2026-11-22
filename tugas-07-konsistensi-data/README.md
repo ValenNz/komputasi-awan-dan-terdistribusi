@@ -162,7 +162,7 @@ Untuk FoodGo, sumber saldo otoritatif harus menegakkan konsistensi transaksional
 
 ## Bagian 2 — Visualisasi Alur Konsistensi (Farrellino)
 
-> **Kontributor:** Farrellino Ulung Satya Amando (103072400005)
+> **Kontributor:** Galang Herjuo Mulya (103072430006)
 > **Fokus:** Sequence Diagram Mermaid & Simulasi Kode
 
 Berikut adalah *Sequence Diagram* yang menggambarkan perbedaan antara skenario *bug* (tanpa jaminan konsistensi) dan skenario *fix* (dengan *Read-Your-Writes*).
@@ -317,5 +317,5 @@ tugas-07-konsistensi-data/
 | Anggota | NIM | Deliverable | Status |
 |---|---|---|---|
 | **Nuevalen Refitra Alswanfo** | 103072430008 | Analisis Sequential vs Eventual, usulan RYW, skenario tambahan GoRide | ✅ Selesai |
-| **Farrellino Ulung Satya Amando** | 103072400005 | Sequence Diagram Mermaid (bug & fix), implementasi `replica_simulation.py` | ✅ Selesai |
+| **Galang Herjuo Mulya** | 103072430006 | Sequence Diagram Mermaid (bug & fix), implementasi `replica_simulation.py` | ✅ Selesai |
 | **Haniel Juanta Sembiring** | 103072400145 | Bukti output simulasi, finalisasi README, penyusunan `JURNAL.md` | ✅ Selesai |

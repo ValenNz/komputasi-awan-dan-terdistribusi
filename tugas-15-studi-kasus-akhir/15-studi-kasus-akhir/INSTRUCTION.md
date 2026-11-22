@@ -7,7 +7,7 @@
 | Anggota | Fokus utama / deliverable |
 |---|---|
 | Nuevalen Refitra Alswanado | Integrasi Docker Compose dan infrastruktur RabbitMQ + MinIO; koordinasi konfigurasi service, jaringan, volume, dan akses dashboard. |
-| Farrellino Ulung Satya Amando | Implementasi/pengujian `sensors/sensor_publisher.py`: beberapa sensor, data terstruktur, pengiriman berkala, dan identitas sensor. |
+| Galang Herjuo Mulya | Implementasi/pengujian `sensors/sensor_publisher.py`: beberapa sensor, data terstruktur, pengiriman berkala, dan identitas sensor. |
 | Haniel Juanta Sembiring | Implementasi/pengujian `processor/consumer_to_storage.py`: consume pesan, validasi/pemrosesan, dan penyimpanan object JSON ke MinIO. |
 | Rohmatul Choirul Anam | Integrasi end-to-end, pengujian skenario gangguan, bukti, diagram arsitektur, dan konsolidasi laporan/refleksi. |
 
@@ -68,7 +68,7 @@ Data dari beberapa sensor berhasil masuk melalui broker dan tersimpan di MinIO, 
 | Nama | NIM |
 |---|---|
 | Nuevalen Refitra Alswanado | 103072430008 |
-| Farrellino Ulung Satya Amando | 103072400005 |
+| Galang Herjuo Mulya | 103072430006 |
 | Haniel Juanta Sembiring | 103072400145 |
 | Rohmatul Choirul Anam | 103072400024 |
 

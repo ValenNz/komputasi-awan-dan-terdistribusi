@@ -7,7 +7,7 @@
 | Anggota | Fokus utama / deliverable |
 |---|---|
 | Nuevalen Refitra Alswanado | Desain Dockerfile berbasis base image OS penuh, instalasi paket, dan konfigurasi startup container. |
-| Farrellino Ulung Satya Amando | Implementasi serta pengujian `provision.sh` untuk skenario backup otomatis. |
+| Galang Herjuo Mulya | Implementasi serta pengujian `provision.sh` untuk skenario backup otomatis. |
 | Haniel Juanta Sembiring | Implementasi serta pengujian alternatif otomasi log rotation/cleanup atau health check; pilih satu skenario yang berbeda dari anggota kedua. |
 | Rohmatul Choirul Anam | Integrasi Dockerfile dan script, uji end-to-end, kumpulkan bukti, serta analisis IaaS dan perbedaan container vs VM. |
 
@@ -62,7 +62,7 @@ Image berhasil dibangun, container berjalan, otomasi terbukti menghasilkan efek,
 | Nama | NIM |
 |---|---|
 | Nuevalen Refitra Alswanado | 103072430008 |
-| Farrellino Ulung Satya Amando | 103072400005 |
+| Galang Herjuo Mulya | 103072430006 |
 | Haniel Juanta Sembiring | 103072400145 |
 | Rohmatul Choirul Anam | 103072400024 |
 

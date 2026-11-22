@@ -7,7 +7,7 @@ Repositori ini digunakan oleh kelompok kami untuk mengerjakan seluruh tugas (Tug
 | Nama | NIM | Peran / Fokus (Opsional, bisa disesuaikan per tugas) |
 | :--- | :--- | :--- |
 | **Nuevalen Refitra Alswanfo** | 103072430008 | - |
-| **FARRELLINO ULUNG SATYA AMANDO** | 103072400005 | - |
+| **Galang Herjuo Mulya** | 103072430006 | - |
 | **Haniel Juanta Sembiring** | 103072400145 | - |
 
 > ⚠️ **PENTING:** Sesuai aturan handbook, **setiap anggota WAJIB melakukan `commit` dan `push` dari laptop masing-masing**. Dilarang keras satu orang mengerjakan semua lalu di-commit atas nama sendiri. History commit adalah bukti kontribusi nyata.

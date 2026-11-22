@@ -7,7 +7,7 @@
 | Anggota | Fokus utama / deliverable |
 |---|---|
 | Nuevalen Refitra Alswanado | Audit dan pematangan analisis Sequential vs Eventual, dampak bisnis, serta skenario tambahan. Periksa ketepatan argumen dan istilah konsistensi. |
-| Farrellino Ulung Satya Amando | Audit sequence diagram Mermaid untuk skenario bug dan fix; verifikasi urutan pesan, aktor, dan kondisi replikasi. |
+| Galang Herjuo Mulya | Audit sequence diagram Mermaid untuk skenario bug dan fix; verifikasi urutan pesan, aktor, dan kondisi replikasi. |
 | Haniel Juanta Sembiring | Verifikasi simulasi `src/replica_simulation.py`, jalankan ulang, telusuri output, dan dokumentasikan hasil aktual. |
 | Rohmatul Choirul Anam | Review teknis dan integrasi: uji kasus batas, cek kesesuaian diagram dengan simulasi, lengkapi matriks pengujian serta review `JURNAL.md` dan bukti. |
 
@@ -61,7 +61,7 @@
 | Nama | NIM |
 |---|---|
 | Nuevalen Refitra Alswanado | 103072430008 |
-| Farrellino Ulung Satya Amando | 103072400005 |
+| Galang Herjuo Mulya | 103072430006 |
 | Haniel Juanta Sembiring | 103072400145 |
 | Rohmatul Choirul Anam | 103072400024 |
 

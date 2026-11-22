@@ -7,7 +7,7 @@
 | Anggota | Fokus utama / deliverable |
 |---|---|
 | Nuevalen Refitra Alswanado | Integrasi `docker-compose.yml`, konfigurasi layanan dan port; koordinasi skenario horizontal 3–4 instance. |
-| Farrellino Ulung Satya Amando | Implementasi dan pengujian `app/app.py`, identitas instance melalui environment variable, dan pemeriksaan response. |
+| Galang Herjuo Mulya | Implementasi dan pengujian `app/app.py`, identitas instance melalui environment variable, dan pemeriksaan response. |
 | Haniel Juanta Sembiring | Konfigurasi Nginx `nginx/nginx.conf`, upstream backend, proxy, dan verifikasi distribusi request. |
 | Rohmatul Choirul Anam | `load_test.py`, pengumpulan metrik jumlah request, latency/kegagalan, serta dokumentasi perbandingan. |
 
@@ -66,7 +66,7 @@ Distribusi request terbukti melalui angka, 3–4 instance berjalan, horizontal d
 | Nama | NIM |
 |---|---|
 | Nuevalen Refitra Alswanado | 103072430008 |
-| Farrellino Ulung Satya Amando | 103072400005 |
+| Galang Herjuo Mulya | 103072430006 |
 | Haniel Juanta Sembiring | 103072400145 |
 | Rohmatul Choirul Anam | 103072400024 |
 

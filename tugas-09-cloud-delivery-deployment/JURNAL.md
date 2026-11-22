@@ -11,7 +11,7 @@
 | Nama | NIM | Porsi Analisis | Status |
 |---|---|---|---|
 | Nuevalen Refitra Alswanfo | 103072430008 | Deployment model + 5 karakteristik NIST + tolak Public murni | ⏳ |
-| Farrellino Ulung Satya Amando | 103072400005 | Service model per komponen + diagram + tolak Private murni | ⏳ |
+| Galang Herjuo Mulya | 103072430006 | Service model per komponen + diagram + tolak Private murni | ⏳ |
 | Haniel Juanta Sembiring | 103072400145 | Risiko spesifik + matriks risiko + mitigasi + UU PDP | ⏳ |
 
 ---
