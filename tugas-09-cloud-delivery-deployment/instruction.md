@@ -1,4 +1,4 @@
-# INSTRUCTION.md — Tugas 09: Cloud Delivery & Deployment Model
+# INSTRUCTION.md - Tugas 09: Cloud Delivery & Deployment Model
 
 **Tujuan:** Menganalisis rancangan Sistem Data Kependudukan dan menentukan deployment model serta service model yang sesuai. Tugas ini analisis/desain, bukan deployment cloud sungguhan.
 
@@ -6,12 +6,12 @@
 
 | Anggota | Fokus utama / deliverable |
 |---|---|
-| Nuevalen Refitra Alswanado | Analisis karakteristik esensial NIST dan kebutuhan kerahasiaan, skalabilitas, serta akses lintas instansi. |
-| Galang Herjuo Mulya | Evaluasi deployment model Public, Private, Hybrid, dan Community Cloud; susun alasan pemilihan dan penolakan alternatif. |
-| Haniel Juanta Sembiring | Pemetaan komponen sistem ke IaaS, PaaS, dan SaaS; jelaskan batas tanggung jawab tiap model. |
-| Rohmatul Choirul Anam | Identifikasi minimal dua risiko spesifik beserta mitigasi; integrasikan argumen dan buat diagram arsitektur konseptual. |
+| Nuevalen Refitra Alswando | Analisis karakteristik esensial NIST dan kebutuhan kerahasiaan, skalabilitas, serta akses lintas instansi. |
+| Galang | Evaluasi deployment model Public, Private, Hybrid, dan Community Cloud; susun alasan pemilihan dan penolakan alternatif. |
+| Haniel | Pemetaan komponen sistem ke IaaS, PaaS, dan SaaS; jelaskan batas tanggung jawab tiap model. |
+| Anam | Identifikasi minimal dua risiko spesifik beserta mitigasi; integrasikan argumen dan buat diagram arsitektur konseptual. |
 
-## Praktik bersama — wajib dilakukan semua anggota
+## Praktik bersama - wajib dilakukan semua anggota
 
 1. Setiap anggota membaca studi kasus dan membuat keputusan awal deployment/service model secara mandiri.
 2. Diskusikan perbedaan keputusan. Jangan langsung menerima rekomendasi PIC tanpa argumen.
@@ -23,7 +23,7 @@
 
 1. Uraikan kebutuhan: data sangat rahasia, ribuan instansi, beban tidak merata, skalabilitas, dan kendali infrastruktur.
 2. Nilai pilihan deployment berdasarkan karakteristik NIST: on-demand self-service, broad network access, resource pooling, rapid elasticity, dan measured service.
-3. Tentukan deployment model yang paling masuk akal dan jelaskan trade-off-nya. Hindari alasan generik seperti “private lebih aman” tanpa penjelasan.
+3. Tentukan deployment model yang paling masuk akal dan jelaskan trade-off-nya. Hindari alasan generik seperti "private lebih aman" tanpa penjelasan.
 4. Petakan komponen berbeda ke service model IaaS/PaaS/SaaS sesuai kebutuhan kontrol dan operasional.
 5. Analisis minimal dua risiko spesifik dan mitigasinya.
 6. Bandingkan dengan satu alternatif yang ditolak.
@@ -31,9 +31,9 @@
 
 ## Berkas submission
 
-- `README.md` — jawaban empat poin sesuai README tugas.
-- `JURNAL.md` — proses, keputusan, kendala, dan log AI.
-- `bukti/` — diagram pendukung bila digunakan.
+- `README.md` - jawaban empat poin sesuai README tugas.
+- `JURNAL.md` - proses, keputusan, kendala, dan log AI.
+- `bukti/` - diagram pendukung bila digunakan.
 
 ## Kriteria selesai
 
@@ -56,7 +56,7 @@ Semua empat pertanyaan pada README tugas terjawab, argumen terikat pada studi ka
 
 | Nama | NIM |
 |---|---|
-| Nuevalen Refitra Alswanado | 103072430008 |
+| Nuevalen Refitra Alswando | 103072430008 |
 | Galang Herjuo Mulya | 103072430006 |
 | Haniel Juanta Sembiring | 103072400145 |
 | Rohmatul Choirul Anam | 103072400024 |

@@ -1,13 +1,13 @@
-# Tugas 9 (Pekan 9) — Cloud Delivery & Deployment Model
+# Tugas 9 (Pekan 9) - Cloud Delivery & Deployment Model
 
 **Materi terkait:** Karakteristik esensial cloud computing (NIST SP 800-145), Deployment Model (Public/Private/Hybrid/Community), Service Model (IaaS/PaaS/SaaS).
 
-> Bagian 2 mata kuliah ini murni **analisis & desain di atas kertas** — tidak ada biaya cloud sama sekali, karena tugas berhenti di tahap rekomendasi, bukan implementasi nyata (implementasi baru mulai Tugas 11).
+> Bagian 2 mata kuliah ini murni **analisis & desain di atas kertas** - tidak ada biaya cloud sama sekali, karena tugas berhenti di tahap rekomendasi, bukan implementasi nyata (implementasi baru mulai Tugas 11).
 
 ## Studi Kasus
 
 Pemerintah ingin membangun **Sistem Data Kependudukan** (nama, NIK, alamat, data biometrik) yang:
-- Sangat **rahasia** (data pribadi warga negara, diatur UU Perlindungan Data Pribadi).
+- Sangat **rahasia** (data pribadi warga negara, diatur UU Pelindungan Data Pribadi).
 - Diakses oleh **ribuan instansi** (dukcapil daerah, kepolisian, bank untuk verifikasi KYC) dengan pola akses yang **tidak rata** (lonjakan saat musim pemilu/pendaftaran sekolah).
 - Butuh **skalabilitas** agar tidak downtime saat lonjakan akses, tapi **tidak boleh** datanya berada di infrastruktur yang tidak terkendali penuh oleh negara.
 
@@ -16,15 +16,15 @@ Pemerintah ingin membangun **Sistem Data Kependudukan** (nama, NIK, alamat, data
 1. **Rekomendasikan Deployment Model** (Public / Private / Hybrid / Community Cloud) yang paling tepat untuk sistem ini. Jelaskan alasannya berdasarkan **karakteristik NIST** (on-demand self-service, broad network access, resource pooling, rapid elasticity, measured service) dikaitkan dengan kebutuhan kerahasiaan vs skalabilitas.
 2. **Rekomendasikan Service Model** (IaaS / PaaS / SaaS) yang tepat untuk komponen-komponen berbeda dari sistem ini (boleh berbeda service model untuk komponen berbeda, mis. database inti vs portal publik untuk pengecekan status).
 3. Jelaskan **minimal 2 risiko spesifik** dari pilihan kalian dan mitigasinya (mis. jika Hybrid Cloud dipilih: risiko sinkronisasi data antara private & public segment).
-4. Bandingkan singkat dengan **satu alternatif yang kalian tolak** — kenapa alternatif itu kurang tepat (mis. kenapa Public Cloud murni ditolak, atau kenapa Private Cloud murni dianggap kurang skalabel).
+4. Bandingkan singkat dengan **satu alternatif yang kalian tolak** - kenapa alternatif itu kurang tepat (mis. kenapa Public Cloud murni ditolak, atau kenapa Private Cloud murni dianggap kurang skalabel).
 
 ## Struktur Submission
 
 ```
 tugas-09-cloud-delivery-deployment/
-├── README.md      # Analisis lengkap (isi dengan poin 1-4 di atas)
-├── JURNAL.md
-└── bukti/          # (opsional) diagram pendukung
+|-- README.md      # Analisis lengkap (isi dengan poin 1-4 di atas)
+|-- JURNAL.md
++-- bukti/          # (opsional) diagram pendukung
 ```
 
 ## Rubrik Penilaian (Tugas 9)
@@ -38,13 +38,13 @@ tugas-09-cloud-delivery-deployment/
 
 ## Batasan Penggunaan AI (Level 2)
 
-Kebijakan **Level 2 (AI Assisted Idea Generation & Structuring)** berlaku — lihat [`../RUBRIK-UMUM.md`](../RUBRIK-UMUM.md). Boleh bertanya ke AI gambaran umum karakteristik NIST/deployment model untuk brainstorming; **tidak boleh** meminta AI menuliskan rekomendasi/analisis akhir yang tinggal ditempel ke `README.md`. Catat pemakaian AI di "Log Penggunaan AI" pada `JURNAL.md`.
+Kebijakan **Level 2 (AI Assisted Idea Generation & Structuring)** berlaku - lihat [`../RUBRIK-UMUM.md`](../RUBRIK-UMUM.md). Boleh bertanya ke AI gambaran umum karakteristik NIST/deployment model untuk brainstorming; **tidak boleh** meminta AI menuliskan rekomendasi/analisis akhir yang tinggal ditempel ke `README.md`. Catat pemakaian AI di "Log Penggunaan AI" pada `JURNAL.md`.
 
 - Jawaban yang terasa seperti "template" (bisa dipakai untuk sistem cloud apa saja tanpa menyebut spesifik kependudukan/data pribadi/regulasi) akan dinilai rendah pada komponen ketepatan rekomendasi.
 - `README.md` wajib membahas minimal satu skenario tandingan yang kalian buat sendiri (mis. "bagaimana jika instansi daerah tidak punya infrastruktur private cloud sendiri?") beserta jawabannya.
 
 
-## Bagian 1 — Rekomendasi Deployment Model (Nuevalen)
+## Bagian 1 - Rekomendasi Deployment Model (Nuevalen)
 
 ### 1.1 Rekomendasi: Hybrid Cloud dengan Segmentasi Berbasis Klasifikasi Data
 
@@ -83,10 +83,11 @@ Ini adalah alasan utama hybrid dipilih. Studi kasus menyebutkan **pola akses tid
 - Pendaftaran sekolah baru (verifikasi KK dan NIK orang tua)
 - Lonjakan KYC perbankan di akhir tahun
 
-**Private cloud murni tidak dapat memenuhi rapid elasticity** tanpa over-provisioning mahal yang menganggur di hari biasa. **Public cloud murni tidak dapat diterima** karena data biometrik. Hybrid adalah satu-satunya model yang memenuhi keduanya:
-- Beban dasar (baseline) ditangani private cloud dengan kapasitas tetap.
-- Lonjakan (burst) di-*spill over* ke public cloud untuk komponen non-sensitif (portal, cache, antrian, CDN).
-- Auto-scaling hanya berlaku di public segment; private segment tetap pada kapasitas terencana.
+Menurut [NIST SP 800-145](https://csrc.nist.gov/pubs/sp/800/145/final), *rapid elasticity* adalah kemampuan menambah dan melepas kapasitas dengan cepat mengikuti perubahan permintaan. Private cloud juga dapat melakukan *scale-out* dan *scale-in* selama masih ada kapasitas dalam kumpulan sumber daya yang tersedia. Pada studi kasus ini, Hybrid Cloud dipilih untuk menjaga kendali negara atas data inti sambil mengurangi kebutuhan menyediakan seluruh kapasitas puncak di pusat data pemerintah.
+
+- Private cloud menangani data inti. API KYC dapat menambah atau mengurangi replika sesuai beban dalam batas kapasitas yang direncanakan.
+- Public cloud menambah kapasitas portal, cache, antrian, dan CDN saat trafik meningkat, dalam batas kuota dan kapasitas layanan penyedia.
+- Kapasitas database inti dan jalur antarsegmen tetap menentukan laju verifikasi yang bisa dilayani. Cache, antrian, dan pembatasan laju membantu meredam lonjakan ke segmen privat.
 
 #### 5. Measured Service
 Penggunaan resource dapat diukur dan diaudit per segmen:
@@ -98,9 +99,9 @@ Penggunaan resource dapat diukur dan diaudit per segmen:
 
 | Kebutuhan Studi Kasus | Bagaimana Hybrid Cloud Memenuhi |
 |---|---|
-| Data sangat rahasia (UU PDP) | Core data di private cloud, kendali penuh negara, tidak keluar yurisdiksi |
-| Ribuan instansi dengan akses tidak rata | Public cloud menyerap lonjakan; private cloud melayani akses terkontrol |
-| Skalabilitas tanpa downtime | Burst ke public cloud saat pemilu/pendaftaran sekolah |
+| Data sangat rahasia (UU PDP) | Database inti ditempatkan di private cloud dalam negeri agar infrastruktur penyimpanannya berada di bawah kendali negara |
+| Ribuan instansi dengan akses tidak rata | Public cloud menyerap lonjakan di portal, sedangkan private cloud menangani verifikasi sesuai kapasitas yang tersedia |
+| Menjaga layanan saat lonjakan | Kapasitas portal dapat bertambah saat pemilu atau pendaftaran sekolah. Ketersediaan verifikasi tetap bergantung pada segmen privat dan koneksi antarsegmen |
 | Infrastruktur terkendali negara | Data biometrik & NIK tidak pernah menyentuh public cloud |
 
 ### 1.4 Trade-off yang Diterima
@@ -110,11 +111,11 @@ Hybrid cloud bukan solusi sempurna. Trade-off yang diterima:
 - **Sinkronisasi data**: data yang perlu diakses dari kedua segmen (misalnya token verifikasi KYC) harus disinkronkan dengan hati-hati.
 - **Biaya integrasi**: API gateway, VPN, dan orkestrasi antar segmen menambah biaya.
 
-Namun trade-off ini **lebih dapat diterima** daripada risiko melanggar UU PDP (jika memilih public cloud) atau risiko downtime massal saat pemilu (jika memilih private cloud murni).
+Namun trade-off ini **lebih dapat diterima** daripada risiko berkurangnya kendali negara atas data inti (jika memilih public cloud murni) atau risiko downtime massal saat pemilu (jika memilih private cloud murni).
 
 ---
 
-## Bagian 4 — Alternatif yang Ditolak: Public Cloud Murni (Nuevalen)
+## Bagian 4 - Alternatif yang Ditolak: Public Cloud Murni (Nuevalen)
 
 Kelompok menolak **Public Cloud Murni** sebagai deployment model untuk Sistem Data Kependudukan. Berikut tiga alasan utama penolakan:
 
@@ -123,23 +124,20 @@ Kelompok menolak **Public Cloud Murni** sebagai deployment model untuk Sistem Da
 Data kependudukan (NIK, biometrik, alamat) adalah **aset kedaulatan negara**, bukan data komersial biasa. Jika disimpan di public cloud milik penyedia asing (AWS, GCP, Azure yang data centernya tersebar global), data tersebut tunduk pada yurisdiksi negara tempat penyedia beroperasi.
 
 - **CLOUD Act (Amerika Serikat)** memungkinkan penegak hukum AS memaksa penyedia cloud AS membuka data warga negara asing, meskipun data tersebut disimpan di luar AS.
-- **Data biometrik** (sidik jari, wajah, iris) tergolong **data pribadi spesifik** menurut UU PDP No. 27/2022 Pasal 4, yang pemrosesannya memerlukan perlindungan khusus.
+- **Data biometrik** (sidik jari, wajah, iris) tergolong **data pribadi spesifik** menurut UU PDP No. 27/2022 Pasal 4 ayat (2) huruf b, yang pemrosesannya memerlukan perlindungan khusus.
 - Menyerahkan data biometrik 280 juta warga negara ke entitas yang tunduk pada hukum asing adalah **risiko kedaulatan yang tidak dapat diterima**.
 
-### Alasan 2: Ketidakpatuhan terhadap UU PDP No. 27/2022
+### Alasan 2: Kendali Infrastruktur dan Kewajiban UU PDP No. 27/2022
 
-UU Perlindungan Data Pribadi Indonesia menetapkan kewajiban ketat bagi pengendali data:
+Pengendali tetap bertanggung jawab atas pemrosesan data pribadi saat menggunakan penyedia cloud. Kewajiban berikut merujuk pada [UU No. 27 Tahun 2022 tentang Pelindungan Data Pribadi](https://jdih.komdigi.go.id/produk_hukum/view/id/832/t/undangundang%20nomor%2027%20tahun%202022).
 
-- **Pasal 35**: Pengendali data wajib menjaga keamanan data pribadi.
-- **Pasal 56**: Larangan transfer data pribadi ke negara lain yang tidak memiliki tingkat perlindungan setara, kecuali ada perjanjian bilateral.
-- **Pasal 4**: Data biometrik adalah data spesifik yang pemrosesannya memerlukan dasar hukum eksplisit dan tujuan spesifik.
+- **Pasal 20 ayat (1) dan Pasal 28** mengharuskan pengendali memiliki dasar pemrosesan dan memproses data sesuai tujuannya.
+- **Pasal 35 dan Pasal 37** mengharuskan pengendali mengamankan data sesuai risiko dan mengawasi pihak yang terlibat dalam pemrosesan di bawah kendalinya.
+- **Pasal 56 ayat (2)-(4)** mengatur transfer data pribadi kepada pengendali atau prosesor di luar wilayah hukum Indonesia. Pengendali harus memastikan negara tempat penerima berkedudukan memiliki tingkat pelindungan setara atau lebih tinggi. Jika syarat itu belum terpenuhi, pengendali harus memastikan pelindungan yang memadai dan mengikat. Jika kedua syarat itu belum terpenuhi, pengendali harus memperoleh persetujuan subjek data.
 
-Public cloud murni membuat pemerintah **kehilangan kendali operasional** atas:
-- Lokasi fisik server (bisa berpindah tanpa pemberitahuan).
-- Akses internal karyawan penyedia cloud ke data.
-- Audit trail yang dapat diverifikasi oleh otoritas Indonesia.
+Studi kasus mensyaratkan infrastruktur data inti berada di bawah kendali penuh negara. Dalam public cloud murni, lokasi pemrosesan, akses administratif, dan ketersediaan jejak audit bergantung pada layanan serta pengaturan dengan penyedia. Ketergantungan ini menjadi alasan kelompok menolak public cloud untuk database inti.
 
-Sanksi pelanggaran UU PDP mencapai **2% dari pendapatan tahunan** (untuk pengendali data sektor publik, dapat berupa sanksi administratif dan pidana bagi pejabat).
+Pasal 57 ayat (3) menetapkan batas maksimum denda administratif sebesar 2% dari pendapatan tahunan atau penerimaan tahunan, dengan memperhitungkan variabel pelanggaran. Ketentuan pidana pada Pasal 67-68 berlaku jika unsur tindak pidananya terpenuhi.
 
 ### Alasan 3: Vendor Lock-In pada Infrastruktur Kritis Negara
 
@@ -156,14 +154,14 @@ Prinsip **digital sovereignty** mengharuskan negara mempertahankan kendali penuh
 
 Public cloud murni **ditolak** karena:
 1. Melanggar kedaulatan data dan membuka risiko yurisdiksi asing.
-2. Tidak memenuhi kewajiban UU PDP untuk data biometrik spesifik.
+2. Tidak memenuhi syarat studi kasus agar infrastruktur data inti berada di bawah kendali penuh negara.
 3. Menciptakan vendor lock-in yang tidak dapat diterima untuk infrastruktur kritis negara.
 
 Oleh karena itu, **Hybrid Cloud** dipilih sebagai kompromi: data sensitif tetap di private cloud (kendali negara penuh), sementara beban lonjakan non-sensitif dapat memanfaatkan elastisitas public cloud tanpa membahayakan kerahasiaan data inti.
 
 ---
 
-## Bagian 2 — Rekomendasi Service Model per Komponen (IaaS / PaaS / SaaS) & Batas Tanggung Jawab (Haniel Juanta Sembiring)
+## Bagian 2 - Rekomendasi Service Model per Komponen (IaaS / PaaS / SaaS) & Batas Tanggung Jawab (Haniel)
 
 Dalam sistem berskala nasional seperti Sistem Data Kependudukan, penggunaan satu jenis *service model* untuk seluruh bagian sistem tidak efektif. Komponen yang menyimpan data biometrik mentah membutuhkan kontrol penuh hingga ke level sistem operasi dan perangkat keras penyimpanan, sedangkan komponen antarmuka warga membutuhkan kemudahan *auto-scaling* saat terjadi lonjakan trafik.
 
@@ -175,7 +173,7 @@ Berikut adalah pemetaan *service model* untuk setiap komponen utama beserta pemb
 |---|---|---|---|---|---|
 | 1 | **Database Inti Kependudukan & Biometrik** | **IaaS** | Private Cloud (Data Center Pemerintah) | NIK, nama, alamat lengkap, rekaman sidik jari, iris mata, wajah | Membutuhkan kendali penuh pemerintah atas konfigurasi OS, *kernel hardening*, isolasi *storage*, dan manajemen kunci enkripsi melalui *Hardware Security Module* (HSM) milik negara tanpa berbagi *runtime* dengan pihak luar. |
 | 2 | **API Verifikasi KYC & Layanan Tokenisasi** | **PaaS** (Managed Container / Kubernetes Internal) | Private Cloud & Segmen Terkontrol (DMZ) | Request validasi NIK dari bank/kepolisian, hash KYC, token respons (`VALID`/`INVALID`) | Tim pengembang pemerintah dapat fokus mengelola logika verifikasi, *rate limiting*, dan aturan *Data Loss Prevention* (DLP), sementara orkestrasi container memudahkan penambahan *replica pod* saat trafik verifikasi bank meningkat. |
-| 3 | **Portal Publik Pengecekan Status** | **PaaS** (Web App Platform + Managed CDN/WAF) | Public Cloud (Data Center Region Indonesia) | Kode tiket permohonan, hash/token status pengajuan KTP/KK, aset web statis | Komponen ini menerima lonjakan trafik langsung dari masyarakat saat pemilu atau pendaftaran sekolah (PPDB). Model PaaS memungkinkan *auto-scaling* instan tanpa mengekspos data pribadi mentah di segmen publik. |
+| 3 | **Portal Publik Pengecekan Status** | **PaaS** (Web App Platform + Managed CDN/WAF) | Public Cloud (Data Center Region Indonesia) | Kode tiket permohonan, hash/token status pengajuan KTP/KK, aset web statis | Komponen ini menerima lonjakan trafik langsung dari masyarakat saat pemilu atau pendaftaran sekolah (PPDB). PaaS mendukung *auto-scaling* sesuai konfigurasi dan kuota layanan untuk menambah kapasitas portal saat trafik naik. |
 | 4 | **Sistem Antrian Pesan & Layanan Notifikasi** | **PaaS** (Message Queue) + **SaaS** (Notification Gateway) | Public Cloud / DMZ | Payload antrian terenkripsi, nomor tujuan/email, pesan status layanan non-rahasia | Antrian berbasis PaaS bertugas sebagai *buffer* (peredam kejut) agar lonjakan request dari portal publik tidak membanjiri database inti di private cloud. Untuk pengiriman pesan pemberitahuan status ke warga (SMS/Email/WhatsApp), pemerintah dapat memakai layanan SaaS gateway karena isi pesannya tidak memuat data biometrik atau NIK penuh. |
 | 5 | **Dashboard Analytics & Statistik Kependudukan** | **PaaS / SaaS Internal Pemerintah** | Private Cloud | Data agregat dan anonim (jumlah penduduk per provinsi, statistik ketersediaan layanan) | Hanya mengolah data statistik yang sudah diagregasi tanpa identitas individu. Penggunaan platform analitik siap pakai mempercepat pembuatan laporan bagi kementerian atau pemerintah daerah tanpa membahayakan privasi warga. |
 | 6 | **Backup Immutable & Disaster Recovery (DR)** | **IaaS** | Private Cloud Sekunder (DRC Pemerintah Berbeda Wilayah) | Salinan terenkripsi database kependudukan dan log audit | Memerlukan kontrol langsung pada level blok penyimpanan (*block/object storage*) dengan fitur *Write-Once-Read-Many* (WORM / *immutable storage*) untuk mencegah manipulasi atau penghapusan cadangan data oleh serangan *ransomware*. |
@@ -200,7 +198,7 @@ Pemilihan antara IaaS, PaaS, dan SaaS pada tabel di atas didasarkan pada seberap
 
 ---
 
-## Bagian 3 — Analisis Risiko Spesifik, Mitigasi, & Kepatuhan UU PDP (Rohmatul Choirul Anam & Haniel Juanta Sembiring)
+## Bagian 3 - Analisis Risiko Spesifik, Mitigasi, & Kepatuhan UU PDP (Anam & Haniel)
 
 Penggunaan arsitektur **Hybrid Cloud** untuk Sistem Data Kependudukan menimbulkan titik rawan khusus, terutama pada perbatasan antara segmen *Private Cloud* (tempat data sensitif berada) dan segmen *Public Cloud* (tempat lalu lintas publik dan lonjakan akses ditangani).
 
@@ -215,7 +213,7 @@ Penggunaan arsitektur **Hybrid Cloud** untuk Sistem Data Kependudukan menimbulka
   4. Mencatat seluruh transaksi lintas segmen ke dalam **Audit Log Terpusat** untuk mendeteksi anomali ukuran payload secara *real-time*.
 
 #### Risiko 2 (R2): Kejenuhan atau Terputusnya Jalur Koneksi Private-Public Saat Lonjakan Trafik (Pemilu / PPDB)
-- **Penjelasan risiko:** Meskipun segmen *Public Cloud* mampu melakukan *auto-scaling* hingga ratusan *instance* saat lonjakan akses pemilu atau pendaftaran sekolah, seluruh permintaan verifikasi yang belum ada di cache pada akhirnya harus melewati jalur jaringan penghubung (*interconnect*) menuju segmen *Private Cloud*. Jika jalur penghubung ini mengalami kejenuhan *bandwidth* (*bottleneck*), latensi tinggi, atau putus, maka portal publik tetap akan gagal memproses permintaan (*timeout*), sementara database inti di segmen private bisa ikut lumpuh akibat banjir koneksi (*thundering herd*).
+- **Penjelasan risiko:** Meskipun segmen *Public Cloud* dapat menambah *instance* melalui *auto-scaling* saat lonjakan akses pemilu atau pendaftaran sekolah, seluruh permintaan verifikasi yang belum ada di cache pada akhirnya harus melewati jalur jaringan penghubung (*interconnect*) menuju segmen *Private Cloud*. Jika jalur penghubung ini mengalami kejenuhan *bandwidth* (*bottleneck*), latensi tinggi, atau putus, maka portal publik tetap akan gagal memproses permintaan (*timeout*), sementara database inti di segmen private bisa ikut lumpuh akibat banjir koneksi (*thundering herd*).
 - **Langkah mitigasi:**
   1. Menyediakan jalur koneksi khusus (*dedicated interconnect / leased line*) yang redundan melalui minimal **dua penyedia jaringan (ISP) berbeda** antara pusat data pemerintah dan region *Public Cloud*.
   2. Menempatkan **Message Queue (Antrian Pesan)** dan **Cache Token/Hash** di segmen *Public Cloud* untuk menahan lonjakan request. Untuk kebutuhan musim pemilu (seperti pengecekan DPT), daftar hash terverifikasi yang sudah dianonimkan dapat di-*pre-warm* ke dalam cache sebelum hari pemungutan suara.
@@ -237,7 +235,7 @@ Penggunaan arsitektur **Hybrid Cloud** untuk Sistem Data Kependudukan menimbulka
 
 ### 3.2 Tabel Penilaian dan Matriks Risiko
 
-| ID | Risiko Spesifik | Likelihood (1-5) | Impact (1-5) | Skor Risiko (L×I) | Prioritas Penanganan |
+| ID | Risiko Spesifik | Likelihood (1-5) | Impact (1-5) | Skor Risiko (LxI) | Prioritas Penanganan |
 |---|---|:-:|:-:|:-:|:-:|
 | **R1** | Kebocoran data biometrik/NIK mentah lintas segmen akibat kesalahan konfigurasi API Gateway/sinkronisasi | 3 | 5 | **15** | Sangat Tinggi |
 | **R2** | Jalur koneksi private-public jenuh atau putus saat lonjakan trafik (pemilu, PPDB, KYC massal) | 4 | 4 | **16** | Sangat Tinggi (Tertinggi) |
@@ -246,7 +244,7 @@ Penggunaan arsitektur **Hybrid Cloud** untuk Sistem Data Kependudukan menimbulka
 
 **Matriks Pemetaan Risiko (Likelihood vs Impact):**
 
-| Likelihood ↓ \ Impact → | Impact 3 (Sedang) | Impact 4 (Besar) | Impact 5 (Kritis / Nasional) |
+| Likelihood v \ Impact -> | Impact 3 (Sedang) | Impact 4 (Besar) | Impact 5 (Kritis / Nasional) |
 |---|:-:|:-:|:-:|
 | **Likelihood 4 (Sering / Mungkin Terjadi Saat Puncak)** | - | **R2 (Skor 16)** | - |
 | **Likelihood 3 (Cukup Mungkin)** | - | **R3 (Skor 12)** | **R1 (Skor 15)** |
@@ -254,12 +252,13 @@ Penggunaan arsitektur **Hybrid Cloud** untuk Sistem Data Kependudukan menimbulka
 
 ### 3.3 Keterkaitan Risiko dan Arsitektur dengan Kepatuhan UU PDP No. 27 Tahun 2022
 
-Desain mitigasi di atas disusun agar patuh terhadap ketentuan Undang-Undang Nomor 27 Tahun 2022 tentang Pelindungan Data Pribadi:
-1. **Klasifikasi Data Pribadi Spesifik (Pasal 4 Ayat 2):** Data biometrik dan data kependudukan yang dikombinasikan untuk mengidentifikasi seseorang secara unik termasuk data pribadi spesifik. Pemisahannya ke segmen *Private Cloud* dengan HSM memastikan negara memegang kendali langsung.
-2. **Kewajiban Penilaian Dampak / DPIA (Pasal 34):** Karena sistem memproses data spesifik warga dalam skala besar dan digunakan untuk verifikasi lintas instansi, pemerintah wajib melaksanakan *Data Protection Impact Assessment* (DPIA) yang salah satu wujudnya adalah matriks risiko dan pengujian batas segmen R1-R4 di atas.
-3. **Kewajiban Keamanan dan Rekam Jejak Pemrosesan (Pasal 31 & Pasal 35):** Pengendali data wajib melindungi data dari akses tidak sah dan mencatat seluruh kegiatan pemrosesan. Hal ini dipenuhi melalui *Audit Log Terpusat* yang merekam setiap request dari *API Gateway* maupun layanan verifikasi KYC.
-4. **Kewajiban Pemberitahuan Kegagalan Pelindungan Data (Pasal 46):** Jika terjadi insiden kebocoran (seperti pada skenario R1), pengendali data wajib memberikan pemberitahuan tertulis paling lambat **3×24 jam** kepada subjek data dan lembaga pengawas PDP. Keberadaan DLP dan audit log real-time memungkinkan deteksi dini untuk memenuhi tenggat waktu tersebut.
-5. **Pembatasan Transfer Data ke Luar Wilayah Hukum RI (Pasal 56):** Penempatan database inti di pusat data dalam negeri serta pembatasan segmen *Public Cloud* hanya pada region Indonesia dengan data berupa token/hash mencegah pelanggaran aturan transfer data lintas batas negara.
+Mitigasi di atas mendukung pemenuhan kewajiban pelindungan data pribadi.
+
+1. **Klasifikasi data (Pasal 4).** Biometrik termasuk data pribadi spesifik berdasarkan ayat (2) huruf b. Kombinasi data pribadi yang dapat mengidentifikasi seseorang tercantum dalam kategori data pribadi umum pada ayat (3) huruf f. NIK tetap merupakan data pribadi yang perlu dilindungi. Rancangan menempatkan NIK dan biometrik pada segmen *Private Cloud* berdasarkan syarat kendali negara dalam studi kasus.
+2. **Penilaian dampak atau DPIA (Pasal 34).** Pemrosesan data biometrik dan pemrosesan data pribadi dalam skala besar termasuk pemrosesan berisiko tinggi. Pemerintah sebagai pengendali wajib menilai dampaknya terhadap subjek data. Matriks R1-R4 dapat menjadi salah satu masukan untuk penilaian tersebut.
+3. **Keamanan dan rekam jejak pemrosesan (Pasal 31 dan Pasal 35).** Pengendali wajib merekam seluruh kegiatan pemrosesan data pribadi serta mengamankan data sesuai sifat dan risikonya. Audit log terpusat mendukung perekaman aktivitas di seluruh komponen pemrosesan, termasuk *API Gateway* dan layanan verifikasi KYC.
+4. **Kewajiban Pemberitahuan Kegagalan Pelindungan Data (Pasal 46):** Jika terjadi insiden kebocoran (seperti pada skenario R1), pengendali data wajib memberikan pemberitahuan tertulis paling lambat **3x24 jam** kepada subjek data dan lembaga pengawas PDP. Keberadaan DLP dan audit log real-time memungkinkan deteksi dini untuk memenuhi tenggat waktu tersebut.
+5. **Transfer data ke luar wilayah hukum Indonesia (Pasal 56).** Pemilihan region Indonesia mengurangi risiko transfer lintas negara. Pemerintah tetap perlu memeriksa lokasi pemrosesan, penyimpanan log dan cadangan, serta keterlibatan prosesor di luar negeri. Syarat Pasal 56 tetap berlaku jika token, hash, atau metadata yang masih dapat dikaitkan dengan seseorang ditransfer ke pengendali atau prosesor di luar wilayah hukum Indonesia.
 
 ### 3.4 Diagram Arsitektur Konseptual Hybrid Cloud
 
@@ -313,16 +312,16 @@ flowchart TB
 
 ---
 
-## Bagian 4 (Lanjutan) — Perbandingan dengan Alternatif Lain yang Ditolak: Private Cloud Murni / IaaS-Only (Galang Herjuo Mulya)
+## Bagian 4 (Lanjutan) - Perbandingan dengan Alternatif Lain yang Ditolak: Private Cloud Murni / IaaS-Only (Galang)
 
 Selain menolak *Public Cloud Murni*, kelompok juga menolak penggunaan **Private Cloud Murni (khususnya jika seluruh komponen dibangun di atas IaaS-Only)** sebagai arsitektur tunggal untuk Sistem Data Kependudukan.
 
 ### 4.1 Alasan Penolakan Private Cloud Murni
 
-1. **Kegagalan Memenuhi *Rapid Elasticity* Saat Lonjakan Musiman:**
-   Beban akses Sistem Data Kependudukan memiliki rasio puncak terhadap rata-rata (*peak-to-average ratio*) yang sangat lebar. Saat hari biasa, trafik didominasi oleh pelayanan rutin Dukcapil dan verifikasi KYC harian. Namun saat musim Pemilu (pengecekan DPT serentak oleh jutaan pemilih dan petugas KPPS) atau masa pendaftaran sekolah (PPDB), trafik portal pengecekan status dapat melonjak puluhan kali lipat dalam hitungan jam. Pada *Private Cloud Murni*, kapasitas dibatasi oleh jumlah server fisik yang sudah dibeli dan dipasang di pusat data pemerintah. Pengadaan dan pemasangan server fisik baru di pemerintahan membutuhkan proses anggaran serta lelang berbulan-bulan, sehingga tidak mungkin melakukan *scale-out* mendadak saat lonjakan terjadi.
-2. **Pemborosan Anggaran (*Over-Provisioning* CAPEX):**
-   Jika pemerintah memaksakan *Private Cloud Murni* agar sanggup menahan beban puncak Pemilu yang hanya terjadi beberapa hari dalam lima tahun, maka negara harus membeli ribuan server fisik yang akan menganggur (*idle*) hingga 80-90% kapasitasnya pada hari-hari biasa. Biaya belanja modal (CAPEX), listrik, pendingin, dan lisensi perangkat lunak untuk menjaga kapasitas puncak tersebut sangat tidak efisien dibanding menyewa kapasitas *Public Cloud* secara *on-demand* hanya ketika musim puncak berlangsung.
+1. **Batas Kapasitas Saat Lonjakan Musiman**
+   Akses Sistem Data Kependudukan dapat meningkat tajam saat pemilu dan pendaftaran sekolah. Private cloud dapat menambah replika dengan cepat selama kumpulan sumber dayanya masih memiliki kapasitas. Jika lonjakan melampaui cadangan yang tersedia, penambahan perangkat fisik memerlukan pengadaan dan pemasangan.
+2. **Biaya Menyediakan Kapasitas Puncak**
+   Menyediakan kapasitas untuk menghadapi lonjakan pemilu meningkatkan biaya belanja modal, listrik, pendingin, dan lisensi. Sebagian kapasitas berpotensi menganggur saat trafik kembali normal. Besarnya trade-off bergantung pada pola trafik, kapasitas cadangan yang dibutuhkan, dan biaya penggunaan public cloud saat puncak.
 3. **Beban Operasional Tinggi jika Menggunakan Pendekatan *IaaS-Only*:**
    Apabila seluruh komponen pendukung (seperti sistem antrian, portal web, caching, dan pengiriman notifikasi) semuanya dibangun dari nol di atas mesin virtual (IaaS), tim TI pemerintah harus mengurus *patching* sistem operasi, konfigurasi kluster *message broker*, dan penyetelan *auto-scaling* secara manual untuk setiap komponen. Hal ini memecah fokus tim keamanan pemerintah yang seharusnya diprioritaskan untuk menjaga keamanan database biometrik inti.
 
@@ -330,14 +329,14 @@ Selain menolak *Public Cloud Murni*, kelompok juga menolak penggunaan **Private 
 
 | Aspek Evaluasi | Hybrid Cloud (Rekomendasi Kelompok) | Public Cloud Murni (Ditolak) | Private Cloud Murni / IaaS-Only (Ditolak) |
 |---|---|---|---|
-| **Kedaulatan Data & Kepatuhan UU PDP** | **Tinggi** — NIK dan biometrik mentah tidak pernah keluar dari pusat data pemerintah | **Rendah** — Data spesifik warga berada di infrastruktur komersial yang rentan yurisdiksi asing (CLOUD Act) | **Tinggi** — Seluruh data berada di pusat data milik negara |
-| **Kemampuan Menangani Lonjakan (*Rapid Elasticity*)** | **Tinggi** — Beban portal publik dan antrian dapat *burst* secara elastis ke *Public Cloud* | **Sangat Tinggi** — Kapasitas komputasi dapat ditambah kapan saja secara instan | **Rendah** — Terbatas pada kapasitas perangkat keras fisik yang sudah terpasang di data center |
-| **Efisiensi Anggaran (CAPEX vs OPEX)** | **Seimbang** — CAPEX terukur untuk beban dasar database inti; OPEX fleksibel hanya saat terjadi lonjakan | **Efisien di Awal (OPEX)**, namun berisiko membengkak dan terkena *vendor lock-in* jangka panjang | **Boros (CAPEX Besar)** — Harus membeli server seukuran beban puncak 5 tahunan yang menganggur di hari biasa |
-| **Ketahanan Layanan Saat Beban Puncak** | **Tinggi** — Database inti terlindung oleh *cache*, antrian, dan *rate limiter* di segmen depan | **Tinggi**, tetapi berisiko dihentikan sepihak jika terjadi masalah kontrak/geopolitik | **Rentan Downtime** — Lonjakan akses warga secara langsung dapat menghabiskan koneksi ke database inti |
+| **Kendali atas Infrastruktur Data Inti** | **Tinggi** - Database inti ditempatkan di pusat data pemerintah | **Lebih terbatas** - Infrastruktur data inti dikelola penyedia komersial | **Tinggi** - Seluruh komponen ditempatkan di pusat data pemerintah |
+| **Kemampuan Menangani Lonjakan (*Rapid Elasticity*)** | Portal dan antrian dapat menambah kapasitas di public cloud. Verifikasi tetap bergantung pada kapasitas privat dan koneksi antarsegmen | Kapasitas dapat bertambah cepat sesuai kuota dan kapasitas layanan penyedia | Kapasitas dapat bertambah cepat selama masih ada cadangan di kumpulan sumber daya internal |
+| **Efisiensi Anggaran (CAPEX vs OPEX)** | CAPEX untuk kapasitas privat terencana dan OPEX public cloud yang mengikuti pemakaian | **Efisien di Awal (OPEX)**, namun berisiko membengkak dan terkena *vendor lock-in* jangka panjang | CAPEX dapat meningkat jika kapasitas cadangan harus menampung beban puncak |
+| **Ketahanan Layanan Saat Beban Puncak** | *Cache*, antrian, dan *rate limiter* mengurangi tekanan pada database inti. Verifikasi tetap bergantung pada kapasitas database dan interkoneksi | **Tinggi**, tetapi berisiko dihentikan sepihak jika terjadi masalah kontrak/geopolitik | **Rentan Downtime** - Lonjakan akses warga secara langsung dapat menghabiskan koneksi ke database inti |
 
 ---
 
-## Bagian 5 — Analisis Skenario Tandingan / Counter-Scenario (Galang Herjuo Mulya & Kelompok)
+## Bagian 5 - Analisis Skenario Tandingan / Counter-Scenario (Kelompok)
 
 Untuk menguji ketahanan rancangan Hybrid Cloud dan pemetaan Service Model di atas terhadap kondisi nyata di lapangan, berikut adalah analisis atas dua skenario tandingan:
 
@@ -369,7 +368,7 @@ Pada hari pemungutan suara, jutaan warga dan petugas TPS mengakses portal publik
 
 | Nama | NIM | Kontribusi Utama |
 |---|---|---|
-| **Nuevalen Refitra Alswanfo** | 103072430008 | Analisis rekomendasi Deployment Model (Hybrid Cloud), evaluasi 5 karakteristik esensial NIST SP 800-145, serta analisis penolakan Public Cloud Murni |
+| **Nuevalen Refitra Alswando** | 103072430008 | Analisis rekomendasi Deployment Model (Hybrid Cloud), evaluasi 5 karakteristik esensial NIST SP 800-145, serta analisis penolakan Public Cloud Murni |
 | **Galang Herjuo Mulya** | 103072430006 | Evaluasi perbandingan opsi Deployment Model, analisis penolakan Private Cloud Murni (IaaS-Only), serta analisis skenario tandingan (*counter-scenario*) |
 | **Haniel Juanta Sembiring** | 103072400145 | Pemetaan 6 komponen sistem ke Service Model (IaaS, PaaS, SaaS), analisis batas tanggung jawab (*Shared Responsibility Model*), serta pengintegrasian dokumentasi |
 | **Rohmatul Choirul Anam** | 103072400024 | Identifikasi 4 risiko spesifik beserta matriks risiko dan langkah mitigasi, pemetaan kepatuhan UU PDP No. 27/2022, serta pembuatan Diagram Arsitektur Konseptual Mermaid |
