@@ -121,21 +121,86 @@ Prinsip **digital sovereignty** mengharuskan negara mempertahankan kendali penuh
 ---
 
 ## 3️⃣ Diskusi Risiko & Mitigasi
-> **PIC: Haniel**
+> **PIC: **
 
 ### Risiko yang Diangkat dalam Diskusi
 | ID | Risiko Spesifik | Likelihood (1-5) | Impact (1-5) | Skor | Mitigasi |
 |---|---|---|---|---|---|
-| R1 | ... | ... | ... | ... | ... |
-| R2 | ... | ... | ... | ... | ... |
-| R3 | ... | ... | ... | ... | ... |
+| R1 | **Kebocoran data biometrik/NIK melalui antar segmen.** Misconfiguration atau bug sinkronisasi pada API gateway/DMZ membuat data mentah ikut tersalin ke segmen public cloud. | 3 | 5 | **15** | (1) Terapkan aturan ketat: data biometrik mentah dilarang keluar dari segmen private. (2) Lakukan tokenisasi atau hashing sebelum data melewati gateway. (3) Pasang DLP dan egress filtering di API gateway. (4) Gunakan mTLS dan WAF di seluruh jalur masuk. (5) Pastikan kunci enkripsi sepenuhnya dikendalikan oleh pemerintah (HSM/BYOK). (6) Catat seluruh perpindahan data dalam audit log terpusat. |
+| R2 | **Link private↔public putus atau jenuh saat lonjakan** (pemilu, KYC massal), sehingga verifikasi gagal padahal beban sudah dialihkan ke public. | 4 | 4 | **16** | (1) Link dedicated (minimal 2 jalur/ISP berbeda). (2) Terapkan *Circuit breaker* dan *rate limiting* di gateway. (3) Siapkan sistem antrian dan cache token/hash di segmen public untuk menahan lonjakan trafik. (4) *Graceful degradation*: cek status tetap jalan, sementara transaksi sensitif ditunda sementara. (5) Uji beban dan simulasi failover berkala. |
+| R3 | **Paparan yurisdiksi asing dan vendor lock-in di segmen public** (misal CLOUD Act; metadata/token tetap dapat diakses penyedia). | 3 | 4 | **12** | (1) Pilih penyedia/region dengan data center di Indonesia. (2) Hanya token/hash yang boleh berada di public. (3) Bangun arsitektur yang mudah dipindahkan (menggunakan container/Kubernetes dan Infrastructure as Code). (4) Exit strategy tertulis dan diuji. (5) Enkripsi dengan kunci milik sendiri. |
+| R4 *(opsional)* | **Ransomware atau penyalahgunaan akses orang dalam di core private.** | 2 | 5 | **10** | (1) Zero trust dan least privilege. (2) Gunakan PAM dan MFA untuk seluruh akun admin. (3) Backup immutable yang terisolasi (DR). (4) Segmentasi jaringan internal. (5) Pantau aktivitas dan perilaku pengguna secara berkala (UEBA). |
 
+### Matriks Risiko (ringkas)
+ 
+| Likelihood ↓ / Impact → | 3 | 4 | 5 |
+| ----------------------- | :-: | :-: | :-: |
+| **4** | | R2 | |
+| **3** | | R3 | R1 |
+| **2** | | | R4 |
+ 
 ### Risiko yang Sempat Diusulkan tapi Ditolak (karena terlalu generik)
-- ... → alasan: tidak spesifik ke konteks data kependudukan
+- "Hacker menyerang server" → alasan: tidak spesifik, berlaku untuk semua sistem TI dan tidak terkait konteks hybrid maupun data kependudukan.
+- "Listrik atau internet mati" → alasan: risiko infrastruktur umum, tidak khas pada arsitektur hybrid.
+- "Biaya cloud mahal" → alasan: isu anggaran, bukan risiko keamanan atau arsitektur.
 
 ### Catatan Kepatuhan UU PDP No. 27/2022
-- Data biometrik tergolong data pribadi **spesifik** → konsekuensi: ...
-- Kewajiban audit trail & hak subjek data: ...
+- Data biometrik tergolong data pribadi **spesifik** (Pasal 4) → konsekuensi: perlindungan lebih ketat, pemrosesan harus di bawah kendali pengendali data, dan perlu penilaian dampak pelindungan data (DPIA, Pasal 34).
+- **Keamanan dan audit trail:** pengendali wajib menjaga keamanan data dan dapat menunjukkan jejak pemrosesan → arsitektur menyediakan audit log terpusat (lihat diagram).
+- **Notifikasi kegagalan pelindungan data:** wajib memberitahu subjek data dan lembaga paling lambat 3×24 jam (Pasal 46) → relevan dengan R1.
+- **Transfer data ke luar wilayah RI:** ada syarat khusus (Pasal 56) → relevan dengan R3.
+- **Hak subjek data** (akses, koreksi, penghapusan) harus dapat dilayani → memerlukan pencatatan dan pemetaan data yang jelas di segmen private.
+
+---
+
+## Diagram Arsitektur Konseptual
+ 
+```mermaid
+flowchart TB
+    WARGA([Warga])
+    BANK([Bank / Mitra KYC])
+ 
+    subgraph PUBLIK["Segmen Public Cloud - non-sensitif, elastis"]
+        CDN["CDN + WAF"]
+        PORTAL["Portal Publik Cek Status"]
+        QUEUE["Antrian / Notifikasi"]
+        CACHE["Cache Token dan Hash"]
+    end
+ 
+    subgraph GATEWAY["Segmen Terkontrol / DMZ"]
+        APIGW["API Gateway<br/>mTLS + Rate Limit + DLP"]
+        TOKEN["Layanan Tokenisasi"]
+    end
+ 
+    subgraph PRIVAT["Segmen Private Cloud - data sensitif"]
+        KYC["API Verifikasi KYC"]
+        DB[("DB Inti: NIK, Alamat, Biometrik")]
+        HSM["HSM / Manajemen Kunci"]
+        AUDIT["Audit Log Terpusat"]
+        BACKUP[("Backup Immutable dan DR")]
+    end
+ 
+    WARGA --> CDN --> PORTAL
+    PORTAL --> CACHE
+    PORTAL --> QUEUE --> APIGW
+    BANK --> APIGW
+    APIGW --> TOKEN --> KYC
+    KYC --> DB
+    DB --- HSM
+    DB --> BACKUP
+    APIGW -.->|log| AUDIT
+    KYC -.->|log| AUDIT
+ 
+    R1{{"R1: kebocoran lintas segmen"}} -. dijaga .-> APIGW
+    R2{{"R2: link jenuh / putus"}} -. diredam .-> QUEUE
+    R3{{"R3: yurisdiksi asing"}} -. dibatasi .-> CACHE
+```
+
+**Keterangan:**
+- **Public:** hanya komponen non-sensitif; data yang tersimpan berupa token/hash.
+- **Gateway/DMZ:** titik kontrol tunggal lintas segmen (autentikasi, DLP, tokenisasi, rate limit).
+- **Private:** seluruh data biometrik dan NIK mentah, kunci enkripsi, audit, dan backup.
+- Label **R1-R3** menunjukkan titik arsitektur tempat risiko dimitigasi.
 
 ---
 
