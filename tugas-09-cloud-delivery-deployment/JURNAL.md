@@ -1,43 +1,44 @@
 # Jurnal Proses — Tugas 9: Cloud Delivery & Deployment Model
 
-**Kelompok:** [Nama Kelompok]
-**Tanggal Mulai:** [isi]
+**Kelompok:** Kelompok Sistem Terdistribusi & Komputasi Awan (Nuevalen, Galang, Haniel, Rohmatul Choirul Anam)
+**Tanggal Mulai:** 20 November 2026
 **Sifat:** Analisis di atas kertas, tanpa implementasi cloud
 
 ---
 
-## 👥 Kontribusi Anggota
+## Kontribusi Anggota
 
 | Nama | NIM | Porsi Analisis | Status |
 |---|---|---|---|
-| Nuevalen Refitra Alswanfo | 103072430008 | Deployment model + 5 karakteristik NIST + tolak Public murni | ⏳ |
-| Galang Herjuo Mulya | 103072430006 | Service model per komponen + diagram + tolak Private murni | ⏳ |
-| Haniel Juanta Sembiring | 103072400145 | Risiko spesifik + matriks risiko + mitigasi + UU PDP | ⏳ |
+| Nuevalen Refitra Alswanfo | 103072430008 | Deployment model + 5 karakteristik NIST + tolak Public murni | Selesai |
+| Galang Herjuo Mulya | 103072430006 | Service model per komponen + diagram + tolak Private murni + skenario tandingan | Selesai |
+| Haniel Juanta Sembiring | 103072400145 | Pemetaan IaaS/PaaS/SaaS + batas tanggung jawab + risiko spesifik + matriks risiko + mitigasi + UU PDP | Selesai |
+| Rohmatul Choirul Anam | 103072400024 | Identifikasi risiko spesifik + matriks risiko + mitigasi + diagram arsitektur | Selesai |
 
 ---
 
-## 🗓️ Log Kegiatan
+## Log Kegiatan
 
 | Tanggal | Kegiatan | Peserta | Hasil |
 |---|---|---|---|
-| ... | Kick-off & pembagian tugas | Semua | Pembagian terlampir di `PEMBAGIAN_TUGAS.md` |
-| ... | Kerja individu | Masing-masing | ... |
-| ... | Review silang | Semua | ... |
-| ... | Finalisasi & push | Semua | ... |
+| 20 Nov 2026 | Kick-off & pembagian tugas | Semua (Nuevalen, Galang, Haniel, Choirul) | Pembagian terlampir di `instruction.md`; menyepakati rekomendasi awal Hybrid Cloud dan pemetaan 6 komponen sistem |
+| 21 Nov 2026 | Kerja individu (Deployment Model & Karakteristik NIST) | Nuevalen, Galang | Menyelesaikan analisis Bagian 1 (Hybrid Cloud & 5 karakteristik NIST), evaluasi perbandingan 4 deployment model, serta alasan penolakan Public Cloud Murni |
+| 22 Nov 2026 | Kerja individu (Service Model, Risiko, UU PDP, & Diagram) | Haniel, Rohmatul Choirul Anam | Menyusun pemetaan komponen ke IaaS/PaaS/SaaS, batas tanggung jawab, 4 risiko spesifik (R1-R4), matriks risiko, kepatuhan UU PDP No. 27/2022, dan diagram Mermaid |
+| 23 Nov 2026 | Review silang, penyusunan skenario tandingan, finalisasi & push | Semua (Nuevalen, Galang, Haniel, Choirul) | Melakukan review silang antar bagian, menambahkan analisis penolakan Private Cloud Murni dan 2 skenario tandingan di `README.md`, serta melengkapi `JURNAL.md` |
 
 ---
 
-## 1️⃣ Diskusi Deployment Model
-> **PIC: Nuevalen** — analisis karakteristik NIST dan pemilihan deployment model
+## 1. Diskusi Deployment Model
+> **PIC: Nuevalen & Galang** — analisis karakteristik NIST dan pemilihan deployment model
 
 ### Opsi yang Dipertimbangkan
 
 | Opsi | Kelebihan untuk Kasus Ini | Kekurangan | Keputusan |
 |---|---|---|---|
-| **Public Cloud** | Elastisitas nyaris tak terbatas saat lonjakan pemilu; biaya operasional rendah (OPEX) | Kendali infrastruktur di tangan penyedia asing; isu kedaulatan data; yurisdiksi CLOUD Act AS; tidak patuh UU PDP untuk data biometrik spesifik | ❌ **Ditolak** |
-| **Private Cloud** | Kendali penuh negara, cocok untuk NIK & biometrik; kepatuhan UU PDP terjamin; audit trail internal | Elastisitas terbatas kapasitas fisik; CAPEX besar; risiko downtime saat lonjakan; butuh waktu lama untuk scale-up | ⚠️ Dipertimbangkan, tapi ditolak sebagai solusi tunggal |
-| **Hybrid Cloud** | Core sensitif di private (kontrol negara), beban lonjakan non-sensitif di public (elastisitas); memadukan kerahasiaan + skalabilitas | Kompleksitas batas segmen & sinkronisasi; butuh API gateway & orkestrasi; biaya integrasi tinggi | ✅ **Dipilih** |
-| **Community Cloud** | Dibagi antar instansi pemerintah (Dukcapil, Polri, Kemenkeu), tata kelola bersama, biaya dibagi | Perlu kesepakatan antar lembaga yang lama; kapasitas tetap terbatas; tidak menyelesaikan masalah lonjakan publik | ⚠️ Dapat jadi pelengkap, tapi bukan solusi utama |
+| **Public Cloud** | Elastisitas nyaris tak terbatas saat lonjakan pemilu; biaya operasional rendah (OPEX) | Kendali infrastruktur di tangan penyedia asing; isu kedaulatan data; yurisdiksi CLOUD Act AS; tidak patuh UU PDP untuk data biometrik spesifik | **Ditolak** |
+| **Private Cloud** | Kendali penuh negara, cocok untuk NIK & biometrik; kepatuhan UU PDP terjamin; audit trail internal | Elastisitas terbatas kapasitas fisik; CAPEX besar; risiko downtime saat lonjakan; butuh waktu lama untuk scale-up | Dipertimbangkan, tapi ditolak sebagai solusi tunggal |
+| **Hybrid Cloud** | Core sensitif di private (kontrol negara), beban lonjakan non-sensitif di public (elastisitas); memadukan kerahasiaan + skalabilitas | Kompleksitas batas segmen & sinkronisasi; butuh API gateway & orkestrasi; biaya integrasi tinggi | **Dipilih** |
+| **Community Cloud** | Dibagi antar instansi pemerintah (Dukcapil, Polri, Kemenkeu), tata kelola bersama, biaya dibagi | Perlu kesepakatan antar lembaga yang lama; kapasitas tetap terbatas; tidak menyelesaikan masalah lonjakan publik | Dapat jadi pelengkap, tapi bukan solusi utama |
 
 ### Alasan Pemilihan
 
@@ -70,7 +71,7 @@ Pola akses tidak rata (lonjakan pemilu, pendaftaran sekolah, KYC perbankan) memb
 
 ---
 
-## 4️⃣ Diskusi Alternatif yang Ditolak
+## 4. Diskusi Alternatif yang Ditolak (Bagian Awal)
 
 ### 4a. Public Cloud Murni — ditolak oleh Nuevalen
 
@@ -97,8 +98,8 @@ Prinsip **digital sovereignty** mengharuskan negara mempertahankan kendali penuh
 
 ---
 
-## 2️⃣ Diskusi Service Model per Komponen
-> **PIC: Farrellino**
+## 2. Diskusi Service Model per Komponen
+> **PIC: Haniel Juanta Sembiring & Galang Herjuo Mulya**
 
 ### Komponen yang Teridentifikasi
 1. Database inti (NIK, alamat, biometrik)
@@ -109,19 +110,24 @@ Prinsip **digital sovereignty** mengharuskan negara mempertahankan kendali penuh
 6. Backup & DR
 
 ### Perdebatan yang Muncul
-- Komponen mana yang **tidak boleh** pakai SaaS sama sekali? Kenapa? → ...
-- Apakah API KYC lebih tepat IaaS atau PaaS? Alasan: → ...
-- Apakah portal publik boleh SaaS penuh? Batasan datanya apa? → ...
+- Komponen mana yang **tidak boleh** pakai SaaS sama sekali? Kenapa? → **Database Inti Kependudukan (NIK, alamat, biometrik)**, **Layanan Verifikasi KYC / Tokenisasi**, serta **Backup & Disaster Recovery (DR)** sama sekali tidak boleh menggunakan SaaS maupun PaaS publik. Pada model SaaS, seluruh lapisan mulai dari infrastruktur, sistem operasi, mesin database, hingga aplikasi dikelola sepenuhnya oleh vendor pihak ketiga. Jika data biometrik (sidik jari, iris, wajah) dan NIK ditaruh di layanan SaaS, pemerintah kehilangan kontrol atas siapa administrator vendor yang bisa mengakses penyimpanan mentah, kehilangan kendali atas kunci enkripsi fisik (HSM), dan melanggar kewajiban pengendali data atas data pribadi spesifik pada UU PDP No. 27/2022 Pasal 4 dan Pasal 35.
+- Apakah API KYC lebih tepat IaaS atau PaaS? Alasan: → Lebih tepat menggunakan **PaaS Internal (berbasis container platform / Managed Kubernetes yang berjalan di atas Private Cloud & DMZ pemerintah)**. Jika menggunakan IaaS murni, tim Dukcapil harus mengelola patching OS, konfigurasi jaringan VM, dan load balancing secara manual setiap kali ada kenaikan trafik verifikasi KYC dari perbankan. Dengan PaaS di segmen private/DMZ, kendali infrastruktur fisik tetap di tangan pemerintah, tetapi aplikasi API KYC dan layanan tokenisasi dapat di-scale secara horizontal (menambah jumlah pod/container) secara cepat serta konsisten menerapkan kebijakan mTLS, rate limiting, dan DLP.
+- Apakah portal publik boleh SaaS penuh? Batasan datanya apa? → Portal publik cek status **tidak disarankan menggunakan SaaS penuh**, melainkan lebih tepat menggunakan **PaaS (Web App Platform + Managed CDN/WAF) di segmen Public Cloud**, sedangkan model **SaaS hanya boleh dipakai secara terbatas untuk layanan pengiriman pesan notifikasi akhir** (seperti SMS/Email/WhatsApp Gateway). Batasan datanya harus mutlak: komponen di segmen publik maupun gateway SaaS **dilarang menerima atau menyimpan NIK utuh, alamat rumah, maupun data biometrik mentah**, dan hanya boleh memproses kode tiket permohonan, hash satu arah, atau pesan status umum (misalnya *"Permohonan dokumen #A982 selesai diproses"*).
 
 ### Kesimpulan Pemetaan
 | Komponen | Service Model | Segmen | Alasan |
 |---|---|---|---|
-| ... | ... | ... | ... |
+| **1. Database inti (NIK, alamat, biometrik)** | **IaaS** | Private Cloud (Data Center Pemerintah) | Membutuhkan kontrol penuh hingga level OS, *kernel hardening*, isolasi jaringan/storage, serta pengelolaan kunci enkripsi di HSM milik negara. |
+| **2. API verifikasi KYC & Tokenisasi** | **PaaS (Internal Container Platform)** | Private Cloud & Segmen Terkontrol (DMZ) | Memudahkan *horizontal scaling* container saat trafik verifikasi bank naik tanpa harus mengurus OS per VM, sambil tetap berada di jaringan terkontrol pemerintah. |
+| **3. Portal publik cek status** | **PaaS (Web Platform + Managed CDN/WAF)** | Public Cloud (Region Indonesia) | Menyerap lonjakan trafik masyarakat saat pemilu atau pendaftaran sekolah dengan *auto-scaling* cepat; hanya membaca cache token/hash tanpa menyimpan data pribadi mentah. |
+| **4. Notifikasi / antrian** | **PaaS (Message Queue) + SaaS (Notification Gateway)** | Public Cloud / DMZ | Antrian PaaS meredam lonjakan request (*buffer*) agar database inti di private cloud tidak tumbang; pengiriman SMS/email status non-rahasia dapat diteruskan lewat SaaS gateway. |
+| **5. Dashboard analytics** | **PaaS / SaaS Internal Pemerintah** | Private Cloud | Hanya mengolah data statistik agregat/anonim (tanpa identitas individu) untuk kebutuhan laporan instansi sehingga aman dijalankan di atas platform analitik terkelola internal. |
+| **6. Backup & DR** | **IaaS** | Private Cloud Sekunder (DRC Pemerintah) | Memerlukan kendali penuh atas *block/object storage* berfitur *immutable* (WORM) dan enkripsi HSM agar cadangan data tahan terhadap serangan *ransomware*. |
 
 ---
 
-## 3️⃣ Diskusi Risiko & Mitigasi
-> **PIC: **
+## 3. Diskusi Risiko & Mitigasi
+> **PIC: Rohmatul Choirul Anam & Haniel Juanta Sembiring**
 
 ### Risiko yang Diangkat dalam Diskusi
 | ID | Risiko Spesifik | Likelihood (1-5) | Impact (1-5) | Skor | Mitigasi |
@@ -204,47 +210,47 @@ flowchart TB
 
 ---
 
-## 4️⃣ Diskusi Alternatif yang Ditolak
+## 4. Ringkasan Diskusi Alternatif yang Ditolak
 
 ### 4a. Public Cloud Murni — ditolak oleh Nuevalen
-- Alasan 1: ...
-- Alasan 2: ...
-- Alasan 3: ...
+- Alasan 1: **Pelanggaran kedaulatan data & risiko yurisdiksi asing** — Data NIK dan biometrik 280 juta warga yang ditaruh di penyedia cloud asing (AWS, GCP, Azure) berisiko terkena aturan ekstrateritorial seperti US CLOUD Act yang dapat memaksa penyedia membuka data meskipun server berada di luar AS.
+- Alasan 2: **Ketidakpatuhan terhadap UU PDP No. 27/2022** — Data biometrik merupakan data pribadi spesifik (Pasal 4) dengan kewajiban perlindungan ketat (Pasal 35) dan pembatasan transfer lintas batas (Pasal 56); pada public cloud murni pemerintah kehilangan kontrol fisik atas lokasi penyimpanan, akses admin internal vendor, serta audit trail independen.
+- Alasan 3: **Vendor lock-in pada infrastruktur kritis nasional** — Ketergantungan penuh pada satu vendor komersial menciptakan risiko penghentian layanan akibat kebijakan geopolitik/sanksi, perubahan harga sepihak, dan biaya migrasi keluar yang sangat berat bagi sistem kependudukan negara.
 
-### 4b. Private Cloud Murni / IaaS-only — ditolak oleh Farrellino
-- Alasan 1 (elastisitas): ...
-- Alasan 2 (beban operasional): ...
+### 4b. Private Cloud Murni / IaaS-only — ditolak oleh Galang Herjuo Mulya
+- Alasan 1 (elastisitas): **Kapasitas fisik kaku dan gagal menangani lonjakan musiman** — Saat musim Pemilu atau pendaftaran sekolah (PPDB), trafik pengecekan data melonjak berkali-kali lipat dibanding hari biasa. Private cloud murni dibatasi oleh jumlah server fisik yang sudah terpasang di pusat data pemerintah; jika dipaksa membeli server seukuran beban puncak 5 tahunan, maka 80-90% server akan menganggur (pemborosan CAPEX) di hari biasa, sedangkan jika kapasitasnya pas-pasan maka sistem akan mengalami downtime saat lonjakan terjadi.
+- Alasan 2 (beban operasional): **Beban pengelolaan manual tinggi jika seluruh komponen berbasis IaaS-only** — Membangun portal publik, CDN, sistem antrian pesan, dan gateway notifikasi secara manual di atas VM (IaaS) mengharuskan tim TI pemerintah mengurus patching OS, konfigurasi kluster antrian, dan penyetelan auto-scaling sendiri untuk semua lapisan. Hal ini menguras sumber daya tim teknis yang seharusnya difokuskan untuk menjaga keamanan database biometrik inti.
 
 ---
 
-## 🔍 Hasil Review Silang
+## Hasil Review Silang
 
 | Reviewer | Bagian yang Direview | Temuan / Koreksi | Sudah Diperbaiki? |
 |---|---|---|---|
-| Nuevalen | Service model Farrellino | ... | ⏳ |
-| Farrellino | Risiko Haniel | ... | ⏳ |
-| Haniel | Argumen NIST Nuevalen | ... | ⏳ |
+| Nuevalen | Pemetaan Service Model per komponen (Bagian 2 - Haniel & Galang) | Awalnya komponen antrian dan pengiriman notifikasi digabung sebagai satu service model; disarankan memisahkan Message Queue (PaaS) sebagai buffer lonjakan dengan Notification Gateway (SaaS) yang hanya mengirim pesan status tanpa NIK/biometrik. | Sudah diperbaiki |
+| Galang & Choirul | Analisis Risiko & Mitigasi (Bagian 3 - Choirul & Haniel) | Menyarankan penambahan penjelasan teknis tentang bagaimana pengecekan DPT saat Pemilu tetap bisa berjalan dari Cache Token/Hash jika link Private-Public putus (mitigasi R2 & skenario tandingan). | Sudah diperbaiki |
+| Haniel | Evaluasi Karakteristik NIST & Deployment Model (Bagian 1 - Nuevalen) | Menyarankan agar bagian *Measured Service* dan *Broad Network Access* dikaitkan langsung dengan audit log terpusat UU PDP serta pemisahan jalur intranet pemerintah vs API Gateway mitra bank. | Sudah diperbaiki |
 
 ---
 
-## 🎯 Refleksi Kelompok
+## Refleksi Kelompok
 *(diisi bersama setelah finalisasi)*
 
-1. Trade-off paling sulit dalam tugas ini: **kerahasiaan vs skalabilitas** — bagaimana kami menyelesaikannya: ...
-2. Hal baru yang dipahami tentang karakteristik NIST: ...
-3. Kenapa satu sistem bisa punya **service model berbeda per komponen**: ...
-4. Yang akan kami lakukan berbeda kalau mengulang: ...
+1. Trade-off paling sulit dalam tugas ini: **kerahasiaan vs skalabilitas** — bagaimana kami menyelesaikannya: Kami menyelesaikannya dengan memisahkan arsitektur berdasarkan **klasifikasi sensitivitas data** pada model Hybrid Cloud. Data pribadi spesifik (NIK, alamat lengkap, sidik jari, iris, wajah) dikunci sebagai *hard constraint* di segmen Private Cloud pemerintah di atas IaaS dengan HSM, sedangkan kebutuhan skalabilitas saat lonjakan Pemilu/PPDB dipenuhi dengan memindahkan beban halaman portal, antrian request, dan pembacaan cache token/hash satu arah ke segmen Public Cloud berbasis PaaS.
+2. Hal baru yang dipahami tentang karakteristik NIST: Sebelumnya kami mengira karakteristik NIST seperti *On-Demand Self-Service*, *Resource Pooling*, dan *Rapid Elasticity* hanya berlaku pada Public Cloud komersial. Dari analisis studi kasus ini, kami memahami bahwa kelima karakteristik NIST tetap harus dipenuhi pada sistem pemerintahan, misalnya *Resource Pooling* antar ribuan instansi (Dukcapil daerah, kepolisian) di kluster Private Cloud serta *Measured Service* untuk keperluan *audit trail* kepatuhan UU PDP dan perhitungan kuota pemakaian API per instansi.
+3. Kenapa satu sistem bisa punya **service model berbeda per komponen**: Karena setiap komponen dalam satu sistem memiliki profil risiko data dan pola beban trafik yang berbeda. Database biometrik membutuhkan kendali penuh sampai level OS, storage, dan kunci kriptografi sehingga wajib menggunakan **IaaS**; aplikasi API KYC dan portal cek status membutuhkan kecepatan *horizontal scaling* tanpa kerepotan mengurus OS per VM sehingga cocok menggunakan **PaaS**; sedangkan pengiriman pesan notifikasi akhir yang tidak membawa data rahasia cukup menggunakan **SaaS** agar tim tidak perlu membangun infrastruktur gateway SMS/email sendiri.
+4. Yang akan kami lakukan berbeda kalau mengulang: Kami akan menyusun diagram aliran data dan klasifikasi data (data mana yang boleh keluar sebagai hash/token vs data mana yang wajib berhenti di segmen private) sejak tahap pertama diskusi sebelum membagi penulisan bagian masing-masing, sehingga pemetaan *Service Model* dan titik mitigasi risiko (`R1`–`R4`) langsung sinkron sejak draf awal.
 
 ---
 
-## ✅ Checklist Akhir
-- [ ] §1 Deployment model + tabel 5 NIST (Nuevalen)
-- [ ] §2 Tabel service model ≥5 komponen + diagram Mermaid (Farrellino)
-- [ ] §3 ≥3 risiko spesifik + matriks + mitigasi + UU PDP (Haniel)
-- [ ] §4a Penolakan Public murni (Nuevalen)
-- [ ] §4b Penolakan Private murni/IaaS-only (Farrellino)
-- [ ] Review silang selesai oleh ketiga anggota
-- [ ] 3 commit terpisah atas nama masing-masing anggota
+## Checklist Akhir
+- [x] §1 Deployment model + tabel 5 NIST (Nuevalen)
+- [x] §2 Tabel service model ≥5 komponen + batas tanggung jawab + diagram Mermaid (Haniel & Galang)
+- [x] §3 ≥3 risiko spesifik + matriks + mitigasi + UU PDP (Rohmatul Choirul Anam & Haniel)
+- [x] §4a Penolakan Public murni (Nuevalen)
+- [x] §4b Penolakan Private murni/IaaS-only & skenario tandingan (Galang)
+- [x] Review silang selesai oleh seluruh anggota
+- [x] Commit terpisah atas nama masing-masing anggota
 
 ## Log Penggunaan AI (Level 2)
 
